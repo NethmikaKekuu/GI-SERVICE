@@ -356,6 +356,113 @@ class OrganisationService:
         except Exception as e:
             raise InternalServerError("An unexpected error occurred") from e
 
+    # helper: enrich body
+    async def enrich_body_item(self, body_relation: Relation, selected_date: str):
+
+        body_id = body_relation.relatedEntityId
+
+        entity = Entity(id=body_id)
+        body_data_task = self.opengin_service.get_entities(entity=entity)
+        dataset_task = self.opengin_service.fetch_relation(entityId=body_id, relation=Relation(name=RelationNameEnum.AS_CATEGORY.value, direction=RelationDirectionEnum.OUTGOING.value))
+
+        # run parallel calls to get body data and parent category relations to ensure the body has data
+        body_data, dataset_relations = await asyncio.gather(body_data_task, dataset_task, return_exceptions=True)
+
+        if isinstance(body_data, Exception):
+            logger.warning(f"Failed to fetch entity data for body {body_id}: {body_data}")
+            raise body_data
+
+        body_first_datum = body_data[0]
+
+        # decode name
+        name = Util.decode_protobuf_attribute_name(body_first_datum.name)
+
+        # check the body is new or not
+        body_start_date = body_relation.startTime
+        is_new = body_start_date == Util.normalize_timestamp(selected_date)
+
+        # check the body has data or not
+        has_data = bool(dataset_relations) and not isinstance(dataset_relations, Exception)
+
+        final_result = {
+            "id": body_id,
+            "name": name,
+            "isNew": is_new,
+            "hasData": has_data
+        }
+
+        return final_result
+
+    # API: bodies by department
+    async def bodies_by_department(self, department_id: str, selected_date: str):
+        """
+        Docstring for bodies_by_department
+
+        :param department_id: Department Id
+        :param selected_date: Selected Date
+
+        output type:
+        {
+            "totalBodies": 0,
+            "newBodies": 0,
+            "bodyList": [
+                {
+                "id": "",
+                "name": "",
+                "isNew": false,
+                "hasData": false
+                },
+            ]
+        }
+        """
+
+        if department_id is None or department_id == "":
+            raise BadRequestError("Department ID is required")
+
+        if selected_date is None or selected_date == "":
+            raise BadRequestError("Selected date is required")
+
+        try:
+            relation = Relation(name=RelationNameEnum.AS_BODY.value,activeAt=Util.normalize_timestamp(selected_date),direction=RelationDirectionEnum.OUTGOING.value)
+            body_relation_list = await self.opengin_service.fetch_relation(
+                entityId=department_id,
+                relation=relation
+            )
+
+            # tasks to run in parallel
+            enrich_body_tasks = [
+                self.enrich_body_item(body_relation=body_relation, selected_date=selected_date)
+                for body_relation in body_relation_list
+            ]
+
+            results = await asyncio.gather(*enrich_body_tasks, return_exceptions=True)
+
+            bodies = []
+            for body_relation, result in zip(body_relation_list, results):
+                if isinstance(result, Exception):
+                    logger.warning(
+                        f"Dropping body {body_relation.relatedEntityId} for department {department_id}: {result}"
+                    )
+                    continue
+                bodies.append(result)
+
+            # Calculate final counts
+            new_bodies = sum(1 for b in bodies if b.get("isNew"))
+
+            # final bodies to return
+            finalResult = {
+                "totalBodies": len(bodies),
+                "newBodies": new_bodies,
+                "bodyList" : bodies,
+            }
+
+            return finalResult
+
+        except (BadRequestError, NotFoundError):
+            raise
+        except Exception as e:
+            raise InternalServerError("An unexpected error occurred") from e
+
     # API: prime minister data for the given date
     async def fetch_prime_minister(self, selected_date):
         """
