@@ -1068,7 +1068,7 @@ class OrganisationService:
             ) from e
 
         minor_kind = first_body.kind.minor
-        body_start_date = Util.normalize_timestamp(body_relation.startTime);
+        body_start_date = Util.normalize_timestamp(body_relation.startTime)
         is_new = body_start_date == selected_date
 
         return {
@@ -1141,11 +1141,8 @@ class OrganisationService:
             )
             raise NotFoundError("Department not found") from e
         except Exception as e:
-            logger.error(
-                f"bodies_by_department: get_entities FAILED — department_id={department_id!r}, error={e!r}"
-            )
             raise InternalServerError(
-                f"bodies_by_department: upstream get_entities failed for department_id={department_id}: {e}"
+                "An unexpected error occurred while fetching entities for department"
             ) from e
 
         if not department_entity:
