@@ -1037,6 +1037,7 @@ class OrganisationService:
         try:
             entity = Entity(id=body_id)
             body_data = await self.opengin_service.get_entities(entity=entity)
+<<<<<<< HEAD
         except (NotFoundError, BadRequestError):
             raise
         except Exception as e:
@@ -1051,6 +1052,18 @@ class OrganisationService:
             logger.error(
                 f"enrich_body_item: no entity data returned for id={body_id!r}"
             )
+=======
+        except NotFoundError:
+            raise NotFoundError(
+                f"enrich_body_item: entity not found for id={body_id!r}"
+            )
+        except Exception as e:
+            raise InternalServerError(
+                f"enrich_body_item: failed to fetch entity id={body_id!r}: {e}"
+            )
+
+        if not body_data:
+>>>>>>> 35adb01 (refactor: added messges to exceptions)
             raise NotFoundError(
                 f"enrich_body_item: no entity data returned for id={body_id!r}"
             )
@@ -1060,12 +1073,18 @@ class OrganisationService:
         try:
             name = Util.decode_protobuf_attribute_name(first_body.name)
         except Exception as e:
+<<<<<<< HEAD
             logger.error(
                 f"enrich_body_item: failed to decode name for id={body_id!r}: {e}"
             )
             raise InternalServerError(
                 f"enrich_body_item: failed to decode name for id={body_id!r}"
             ) from e
+=======
+            raise InternalServerError(
+                f"enrich_body_item: failed to decode name for id={body_id!r}: {e}"
+            )
+>>>>>>> 35adb01 (refactor: added messges to exceptions)
 
         minor_kind = first_body.kind.minor
         body_start_date = Util.normalize_timestamp(body_relation.startTime)
@@ -1137,9 +1156,15 @@ class OrganisationService:
             )
         except (BadRequestError, NotFoundError):
             raise
+        except Exception as e:
+            raise InternalServerError(
+                f"bodies_by_department: failed to fetch department entity id={department_id!r}: {e}"
+            )
 
         if not department_entity:
-            raise NotFoundError()
+            raise NotFoundError(
+                f"bodies_by_department: department not found for id={department_id!r}"
+            )
 
         relation = Relation(
             name=RelationNameEnum.AS_BODY.value,
@@ -1153,6 +1178,7 @@ class OrganisationService:
             )
         except (BadRequestError, NotFoundError):
             raise
+<<<<<<< HEAD
         except Exception as e:
             logger.error(
                 f"bodies_by_department: failed to fetch body relations for department_id={department_id!r}: {e}"
@@ -1160,6 +1186,14 @@ class OrganisationService:
             raise InternalServerError(
                 f"bodies_by_department: failed to fetch body relations for department_id={department_id!r}"
             ) from e
+=======
+        except NotFoundError:
+            raise
+        except Exception as e:
+            raise InternalServerError(
+                f"bodies_by_department: failed to fetch body relations for department_id={department_id!r}: {e}"
+            )
+>>>>>>> 35adb01 (refactor: added messges to exceptions)
 
         if not body_relation_list:
             logger.error(
@@ -1194,9 +1228,12 @@ class OrganisationService:
 
         if failures and not bodies:
             # every single enrichment failed — this is a real error, not "zero bodies"
+<<<<<<< HEAD
             logger.error(
                 f"bodies_by_department: all body enrichments failed for department_id={department_id!r}"
             )
+=======
+>>>>>>> 35adb01 (refactor: added messges to exceptions)
             raise InternalServerError(
                 f"bodies_by_department: all body enrichments failed for department_id={department_id!r}: {failures}"
             )
