@@ -1,70 +1,54 @@
-from typing import Literal
-from pydantic import BaseModel
+from typing import List, Optional
 
-
-class Label(BaseModel):
-    """Label refers to an entity with id and name"""
-
-    id: str = ""
-    name: str = ""
-
-
-class Kind(BaseModel):
-    """Kind refers to the type of entity in the OpenGIN Specification"""
-
-    major: str = ""
-    minor: str = ""
-
-
-class Entity(BaseModel):
-    """Entity refers to the object in the OpenGIN Specification"""
-
-    id: str = ""
-    name: str = ""
-    kind: Kind = Kind()
-    created: str = ""
-    terminated: str = ""
-
-
-class Relation(BaseModel):
-    """Relation refers to the relation between two entities in the OpenGIN Specification"""
-
-    name: str = ""
-    activeAt: str = ""
-    relatedEntityId: str = ""
-    startTime: str = ""
-    endTime: str = ""
-    id: str = ""
-    direction: str = ""
-
-
-class Category(BaseModel):
-    """Category refers to the parent/child category in the OpenGIN Specification"""
-
-    id: str = ""
-    name: str = ""
-    kind: Kind = Kind()
-
-
-class Dataset(BaseModel):
-    """Dataset refers to the dataset in the OpenGIN Specification"""
-
-    id: str = ""
-    label: Label = Label()
-    kind: Kind = Kind()
-
+from pydantic import BaseModel, ConfigDict, Field, field_validator
+from datetime import date as _date
 
 class Date(BaseModel):
-    date: str
+    """
+    Request body carrying the as-of date for point-in-time lookups.
+    """
+
+    date: str = Field(
+        ...,
+        description="Date to query persons as-of.",
+        examples=["2026-04-21"],
+    )
+
+    @field_validator("date")
+    @classmethod
+    def _validate_iso_date(cls, value: str) -> str:
+        if not value or not value.strip():
+            raise ValueError("date must not be empty")
+        try:
+            _date.fromisoformat(value)
+        except ValueError as exc:
+            raise ValueError("date must be in ISO-8601 format (YYYY-MM-DD)") from exc
+        return value
 
 
-class AttributeFilterRecord(BaseModel):
-    field_name: str
-    operator: Literal[
-        "eq", "neq", "gt", "lt", "gte", "lte", "contains", "notcontains"
-    ] = "eq"
-    value: str
+class PersonListItem(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    id: str = Field(..., description="Person ID", examples=["cit-xx"])
+    name: str = Field(
+        ..., description="Fully resolved, human-readable name", examples=["Test Person"]
+    )
+    isNew: bool = Field(
+        ..., description="True if start_time falls on the queried date", examples=[False]
+    )
+    isPresident: bool = Field(
+        ...,
+        description="True if this person is the currently selected president",
+        examples=[False],
+    )
 
 
-class AttributeFilterRecords(BaseModel):
-    records: list[AttributeFilterRecord]
+class PortfolioPersonsResponse(BaseModel):
+
+    totalCount: int = Field(
+        ..., ge=0, description="Total number of People' in Portfolio", examples=[1]
+    )
+    newCount: int = Field(
+        ..., ge=0, description="Count of persons where is_new is true", examples=[0]
+    )
+    personList: List[PersonListItem]

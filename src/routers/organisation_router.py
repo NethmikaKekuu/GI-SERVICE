@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, Query, Body, Path
-from src.models import Date
+from src.models import Date, PortfolioPersonsResponse
 from src.services import OpenGINService, OrganisationService
 from typing import Sequence
 
@@ -97,6 +97,7 @@ async def department_history_timeline(
     "/portfolio/{portfolio_id}/person",
     summary="Get persons assigned to a portfolio on a given date.",
     description="Returns the enriched list of persons appointed to a given portfolio as of a specific date, along with precomputed summary counts and president/new-appointment flags.",
+    response_model=PortfolioPersonsResponse,
 )
 async def portfolio_by_person(
     portfolio_id: str = Path(..., description="ID of the portfolio"),
@@ -106,7 +107,6 @@ async def portfolio_by_person(
     return await service.get_persons_by_portfolio(
         portfolio_id=portfolio_id, selected_date=body.date
     )
-
 
 @router.post(
     "/department/{department_id}/bodies",

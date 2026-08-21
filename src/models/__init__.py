@@ -1,5 +1,5 @@
 from .data_requestbody import DataCatalogRequest, DatasetYearsRequest
-from .organisation_schemas import (
+from .opengin_schemas import (
     AttributeFilterRecord,
     AttributeFilterRecords,
     Category,
@@ -12,6 +12,7 @@ from .organisation_schemas import (
 )
 from .person_schemas import PersonResponse, PersonSource
 from .search_schemas import SearchResponse, SearchResult
+from .organisation_schemas import Date, PortfolioPersonsResponse, PersonListItem
 
 __all__ = [
     "AttributeFilterRecord",
@@ -29,4 +30,6 @@ __all__ = [
     "Relation",
     "SearchResponse",
     "SearchResult",
+    "PersonListItem",
+    "PortfolioPersonsResponse"
 ]

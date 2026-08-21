@@ -8,7 +8,7 @@ import logging
 from typing import Optional, Sequence
 from src.enums import EntityIdEnum, RelationDirectionEnum, RelationNameEnum
 from src.exception import BadRequestError, InternalServerError, NotFoundError
-from src.models import Entity, Relation
+from src.models import Entity, Relation, PersonListItem, PortfolioPersonsResponse
 from src.utils import Util, http_client
 
 logger = logging.getLogger(__name__)
@@ -1034,7 +1034,6 @@ class OrganisationService:
         """
         Fetch the active portfolio and then fetch the people assigned to the portfolio.
         """
-
         # Need to check if actual portfolio is present
         if not portfolio_id or not portfolio_id.strip():
             raise BadRequestError("Portfolio ID is required")
@@ -1144,13 +1143,26 @@ class OrganisationService:
             if results and not person_list:
                 raise InternalServerError("Failed to process persons for portfolio")
 
-            new_count = sum(1 for p in person_list if p.get("isNew"))
+            try:
+                validated_persons = [PersonListItem(**p) for p in person_list]
+            except Exception as e:
+                logger.error(
+                    f"enrich_person_data returned a payload that doesn't match "
+                    f"PersonListItem for portfolio {portfolio_id}: {e}",
+                    exc_info=True,
+                )
+                raise InternalServerError(
+                    "Failed to process persons for portfolio"
+                ) from e
 
-            return {
-                "totalCount": len(person_list),
-                "newCount": new_count,
-                "personList": person_list,
-            }
+            new_count = sum(1 for p in validated_persons if p.isNew)
+
+            response = PortfolioPersonsResponse(
+                totalCount=len(validated_persons),
+                newCount=new_count,
+                personList=validated_persons,
+            )
+            return response.model_dump()
 
         except (BadRequestError, NotFoundError):
             raise
