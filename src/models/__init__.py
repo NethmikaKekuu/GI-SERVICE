@@ -16,7 +16,6 @@ from .organisation_schemas import (
     PortfolioPersonsResponse,
     PersonListItem,
     BodyListItem,
-    BodiesByDepartmentBody,
     BodiesByDepartmentResponse,
 )
 
@@ -39,6 +38,5 @@ __all__ = [
     "PersonListItem",
     "PortfolioPersonsResponse",
     "BodyListItem",
-    "BodiesByDepartmentBody",
     "BodiesByDepartmentResponse",
 ]
