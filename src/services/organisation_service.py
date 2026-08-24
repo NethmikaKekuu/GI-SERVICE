@@ -8,7 +8,15 @@ import logging
 from typing import Optional, Sequence
 from src.enums import EntityIdEnum, RelationDirectionEnum, RelationNameEnum
 from src.exception import BadRequestError, InternalServerError, NotFoundError
-from src.models import Entity, Relation, PersonListItem, PortfolioPersonsResponse, BodiesByDepartmentResponse, BodiesByDepartmentBody, BodyListItem
+from src.models import (
+    Entity,
+    Relation,
+    PersonListItem,
+    PortfolioPersonsResponse,
+    BodiesByDepartmentResponse,
+    BodiesByDepartmentBody,
+    BodyListItem,
+)
 from src.utils import Util, http_client
 
 logger = logging.getLogger(__name__)
@@ -1237,16 +1245,18 @@ class OrganisationService:
 
         output type:
         {
-            "totalBodies": 0,
-            "newBodies": 0,
-            "bodyList": [
-                {
-                "name": "",
-                "id": "",
-                "isNew": false,
-                "type": "",
-                },
-            ]
+            "body": {
+                "totalBodies": 0,
+                "newBodies": 0,
+                "bodyList": [
+                    {
+                    "name": "",
+                    "id": "",
+                    "isNew": false,
+                    "type": "",
+                    },
+                ]
+            }
         }
         """
 
@@ -1300,14 +1310,6 @@ class OrganisationService:
             raise InternalServerError(
                 f"bodies_by_department: failed to fetch body relations for department_id={department_id!r}"
             ) from e
-            raise
-        except Exception as e:
-            logger.error(
-                f"bodies_by_department: failed to fetch body relations for department_id={department_id!r}: {e}"
-            )
-            raise InternalServerError(
-                f"bodies_by_department: failed to fetch body relations for department_id={department_id!r}"
-            )
 
         if not body_relation_list:
             logger.error(
@@ -1365,7 +1367,7 @@ class OrganisationService:
                 bodyList=bodies,
             )
         )
- 
+
         return response.model_dump()
 
     # API: fetch presidents with terms and gazettes sorted by date

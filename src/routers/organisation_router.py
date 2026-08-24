@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, Query, Body, Path
-from src.models import Date, PortfolioPersonsResponse
+from src.models import Date, PortfolioPersonsResponse, BodiesByDepartmentResponse
 from src.services import OpenGINService, OrganisationService
 from typing import Sequence
 
@@ -108,10 +108,12 @@ async def portfolio_by_person(
         portfolio_id=portfolio_id, selected_date=body.date
     )
 
+
 @router.post(
     "/department/{department_id}/bodies",
     summary="Get active bodies for a department.",
     description="Returns a list of bodies under a given department and a given date.",
+    response_model=BodiesByDepartmentResponse,
 )
 async def bodies_by_department(
     department_id: str = Path(..., description="ID of the department"),

@@ -4,7 +4,6 @@ from .opengin_schemas import (
     AttributeFilterRecords,
     Category,
     Dataset,
-    Date,
     Entity,
     Kind,
     Label,
@@ -12,7 +11,14 @@ from .opengin_schemas import (
 )
 from .person_schemas import PersonResponse, PersonSource
 from .search_schemas import SearchResponse, SearchResult
-from .organisation_schemas import Date, PortfolioPersonsResponse, PersonListItem, BodyListItem, BodiesByDepartmentBody, BodiesByDepartmentResponse
+from .organisation_schemas import (
+    Date,
+    PortfolioPersonsResponse,
+    PersonListItem,
+    BodyListItem,
+    BodiesByDepartmentBody,
+    BodiesByDepartmentResponse,
+)
 
 __all__ = [
     "AttributeFilterRecord",

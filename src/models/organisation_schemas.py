@@ -1,7 +1,8 @@
-from typing import List, Optional
+from typing import List
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 from datetime import date as _date
+
 
 class Date(BaseModel):
     """
@@ -34,7 +35,9 @@ class PersonListItem(BaseModel):
         ..., description="Fully resolved, human-readable name", examples=["Test Person"]
     )
     isNew: bool = Field(
-        ..., description="True if start_time falls on the queried date", examples=[False]
+        ...,
+        description="True if start_time falls on the queried date",
+        examples=[False],
     )
     isPresident: bool = Field(
         ...,
@@ -44,7 +47,6 @@ class PersonListItem(BaseModel):
 
 
 class PortfolioPersonsResponse(BaseModel):
-
     totalCount: int = Field(
         ..., ge=0, description="Total number of People' in Portfolio", examples=[1]
     )
@@ -56,25 +58,24 @@ class PortfolioPersonsResponse(BaseModel):
 
 class BodyListItem(BaseModel):
     """Maps to the item schema under bodyList — all four fields required."""
- 
+
     model_config = ConfigDict(extra="forbid")
- 
+
     name: str
     id: str
     isNew: bool
     type: str
- 
- 
+
+
 class BodiesByDepartmentBody(BaseModel):
- 
     model_config = ConfigDict(extra="forbid")
- 
+
     totalBodies: int = Field(..., ge=0)
     newBodies: int = Field(..., ge=0)
     bodyList: List[BodyListItem] = Field(default_factory=list)
- 
- 
+
+
 class BodiesByDepartmentResponse(BaseModel):
     """Top-level envelope — wrapped in `body`, same pattern as active-portfolio-list."""
- 
+
     body: BodiesByDepartmentBody
