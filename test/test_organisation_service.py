@@ -338,7 +338,6 @@ async def test_departments_by_portfolio_id_success(
         )
     ]
 
-    # Patch enrich_department_item with AsyncMock returning the department dict
     with patch(
         "src.services.organisation_service.OrganisationService.enrich_department_item",
         new_callable=AsyncMock,
@@ -354,7 +353,7 @@ async def test_departments_by_portfolio_id_success(
             portfolio_id=portfolio_id, selected_date=selected_date
         )
 
-    assert result == {
+    assert result.model_dump() == {
         "totalDepartments": 1,
         "newDepartments": 0,
         "departmentList": [
@@ -367,7 +366,6 @@ async def test_departments_by_portfolio_id_success(
         ],
     }
 
-    # Check fetch_relation was called correctly
     mock_opengin_service.fetch_relation.assert_called_once_with(
         entityId=portfolio_id,
         relation=Relation(
@@ -377,7 +375,6 @@ async def test_departments_by_portfolio_id_success(
         ),
     )
 
-    # Ensure enrich_department_item was called once with the correct args
     mock_enrich_department.assert_called_once_with(
         department_relation=mock_opengin_service.fetch_relation.return_value[0],
         selected_date=selected_date,

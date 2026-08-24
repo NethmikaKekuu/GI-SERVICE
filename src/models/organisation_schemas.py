@@ -75,3 +75,16 @@ class BodiesByDepartmentResponse(BaseModel):
     totalBodies: int = Field(..., ge=0)
     newBodies: int = Field(..., ge=0)
     bodyList: List[BodyListItem] = Field(default_factory=list)
+
+
+class DepartmentItem(BaseModel):
+    id: str
+    name: str
+    isNew: bool = False
+    hasData: bool = False
+
+
+class DepartmentsByPortfolioResponse(BaseModel):
+    totalDepartments: int = 0
+    newDepartments: int = 0
+    departmentList: List[DepartmentItem] = Field(default_factory=list)

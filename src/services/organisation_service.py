@@ -15,6 +15,7 @@ from src.models import (
     PortfolioPersonsResponse,
     BodiesByDepartmentResponse,
     BodyListItem,
+    DepartmentsByPortfolioResponse,
 )
 from src.utils import Util, http_client
 
@@ -432,12 +433,11 @@ class OrganisationService:
             # Calculate final counts
             new_departments = sum(1 for d in departments if d.get("isNew"))
 
-            # final departments to return
-            final_result = {
-                "totalDepartments": len(departments),
-                "newDepartments": new_departments,
-                "departmentList": departments,
-            }
+            final_result = DepartmentsByPortfolioResponse(
+                totalDepartments=len(departments),
+                newDepartments=new_departments,
+                departmentList=departments,
+            )
 
             return final_result
 
