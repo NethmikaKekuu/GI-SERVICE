@@ -1763,22 +1763,24 @@ async def test_bodies_by_department_success(organisation_service, mock_opengin_s
         )
 
     assert result == {
-        "totalBodies": 2,
-        "newBodies": 1,
-        "bodyList": [
-            {
-                "id": "body_1",
-                "name": "Body 1 Name",
-                "isNew": True,
-                "type": "Council",
-            },
-            {
-                "id": "body_2",
-                "name": "Body 2 Name",
-                "isNew": False,
-                "type": "",
-            },
-        ],
+        "body": {
+            "totalBodies": 2,
+            "newBodies": 1,
+            "bodyList": [
+                {
+                    "id": "body_1",
+                    "name": "Body 1 Name",
+                    "isNew": True,
+                    "type": "Council",
+                },
+                {
+                    "id": "body_2",
+                    "name": "Body 2 Name",
+                    "isNew": False,
+                    "type": "",
+                },
+            ],
+        }
     }
 
     mock_opengin_service.get_entities.assert_called_once_with(
@@ -1841,16 +1843,18 @@ async def test_bodies_by_department_partial_enrichment_failure(
         )
 
     assert result == {
-        "totalBodies": 1,
-        "newBodies": 1,
-        "bodyList": [
-            {
-                "id": "body_1",
-                "name": "Body 1 Name",
-                "isNew": True,
-                "type": "Council",
-            }
-        ],
+        "body": {
+            "totalBodies": 1,
+            "newBodies": 1,
+            "bodyList": [
+                {
+                    "id": "body_1",
+                    "name": "Body 1 Name",
+                    "isNew": True,
+                    "type": "Council",
+                }
+            ],
+        }
     }
 
 
