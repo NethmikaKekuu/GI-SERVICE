@@ -14,7 +14,6 @@ from src.models import (
     PersonListItem,
     PortfolioPersonsResponse,
     BodiesByDepartmentResponse,
-    BodiesByDepartmentBody,
     BodyListItem,
 )
 from src.utils import Util, http_client
@@ -1245,7 +1244,7 @@ class OrganisationService:
 
         output type:
         {
-            "body": {
+            {
                 "totalBodies": 0,
                 "newBodies": 0,
                 "bodyList": [
@@ -1361,11 +1360,9 @@ class OrganisationService:
         new_bodies = sum(1 for d in bodies if d.get("isNew"))
 
         response = BodiesByDepartmentResponse(
-            body=BodiesByDepartmentBody(
-                totalBodies=len(bodies),
-                newBodies=new_bodies,
-                bodyList=bodies,
-            )
+            totalBodies=len(bodies),
+            newBodies=new_bodies,
+            bodyList=bodies,
         )
 
         return response.model_dump()

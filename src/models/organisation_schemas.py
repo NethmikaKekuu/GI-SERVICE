@@ -67,15 +67,11 @@ class BodyListItem(BaseModel):
     type: str
 
 
-class BodiesByDepartmentBody(BaseModel):
+class BodiesByDepartmentResponse(BaseModel):
+    """Flat response — no envelope."""
+
     model_config = ConfigDict(extra="forbid")
 
     totalBodies: int = Field(..., ge=0)
     newBodies: int = Field(..., ge=0)
     bodyList: List[BodyListItem] = Field(default_factory=list)
-
-
-class BodiesByDepartmentResponse(BaseModel):
-    """Top-level envelope — wrapped in `body`, same pattern as active-portfolio-list."""
-
-    body: BodiesByDepartmentBody
