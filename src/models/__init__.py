@@ -12,7 +12,7 @@ from .opengin_schemas import (
 )
 from .person_schemas import PersonResponse, PersonSource
 from .search_schemas import SearchResponse, SearchResult
-from .organisation_schemas import Date, PortfolioPersonsResponse, PersonListItem
+from .organisation_schemas import Date, PortfolioPersonsResponse, PersonListItem, BodyListItem, BodiesByDepartmentBody, BodiesByDepartmentResponse
 
 __all__ = [
     "AttributeFilterRecord",
@@ -31,5 +31,8 @@ __all__ = [
     "SearchResponse",
     "SearchResult",
     "PersonListItem",
-    "PortfolioPersonsResponse"
+    "PortfolioPersonsResponse",
+    "BodyListItem",
+    "BodiesByDepartmentBody",
+    "BodiesByDepartmentResponse",
 ]

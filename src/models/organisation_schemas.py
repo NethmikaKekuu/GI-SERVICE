@@ -52,3 +52,29 @@ class PortfolioPersonsResponse(BaseModel):
         ..., ge=0, description="Count of persons where is_new is true", examples=[0]
     )
     personList: List[PersonListItem]
+
+
+class BodyListItem(BaseModel):
+    """Maps to the item schema under bodyList — all four fields required."""
+ 
+    model_config = ConfigDict(extra="forbid")
+ 
+    name: str
+    id: str
+    isNew: bool
+    type: str
+ 
+ 
+class BodiesByDepartmentBody(BaseModel):
+ 
+    model_config = ConfigDict(extra="forbid")
+ 
+    totalBodies: int = Field(..., ge=0)
+    newBodies: int = Field(..., ge=0)
+    bodyList: List[BodyListItem] = Field(default_factory=list)
+ 
+ 
+class BodiesByDepartmentResponse(BaseModel):
+    """Top-level envelope — wrapped in `body`, same pattern as active-portfolio-list."""
+ 
+    body: BodiesByDepartmentBody

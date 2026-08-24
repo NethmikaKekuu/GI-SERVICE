@@ -8,7 +8,7 @@ import logging
 from typing import Optional, Sequence
 from src.enums import EntityIdEnum, RelationDirectionEnum, RelationNameEnum
 from src.exception import BadRequestError, InternalServerError, NotFoundError
-from src.models import Entity, Relation, PersonListItem, PortfolioPersonsResponse
+from src.models import Entity, Relation, PersonListItem, PortfolioPersonsResponse, BodiesByDepartmentResponse, BodiesByDepartmentBody, BodyListItem
 from src.utils import Util, http_client
 
 logger = logging.getLogger(__name__)
@@ -1220,12 +1220,12 @@ class OrganisationService:
         body_start_date = Util.normalize_timestamp(body_relation.startTime)
         is_new = body_start_date == selected_date
 
-        return {
-            "id": body_id,
-            "name": name,
-            "isNew": is_new,
-            "type": minor_kind,
-        }
+        return BodyListItem(
+            id=body_id,
+            name=name,
+            isNew=is_new,
+            type=minor_kind,
+        ).model_dump()
 
     # API: Bodies by departments
     async def bodies_by_department(self, department_id: str, selected_date: str):
@@ -1284,6 +1284,7 @@ class OrganisationService:
             name=RelationNameEnum.AS_BODY.value,
             activeAt=normalized_date,
             direction=RelationDirectionEnum.OUTGOING.value,
+            response_model=BodiesByDepartmentResponse,
         )
 
         try:
@@ -1357,13 +1358,15 @@ class OrganisationService:
 
         new_bodies = sum(1 for d in bodies if d.get("isNew"))
 
-        final_result = {
-            "totalBodies": len(bodies),
-            "newBodies": new_bodies,
-            "bodyList": bodies,
-        }
-
-        return final_result
+        response = BodiesByDepartmentResponse(
+            body=BodiesByDepartmentBody(
+                totalBodies=len(bodies),
+                newBodies=new_bodies,
+                bodyList=bodies,
+            )
+        )
+ 
+        return response.model_dump()
 
     # API: fetch presidents with terms and gazettes sorted by date
     async def fetch_presidents(self):
