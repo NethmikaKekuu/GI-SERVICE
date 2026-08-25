@@ -4,6 +4,7 @@ from src.models import (
     PortfolioPersonsResponse,
     BodiesByDepartmentResponse,
     ActivePortfolioListResponse,
+    PrimeMinisterResponse,
 )
 from src.services import OpenGINService, OrganisationService
 from typing import Sequence
@@ -46,11 +47,11 @@ async def departments_by_portfolio(
     )
     return service_response
 
-
-@router.post("/prime-minister")
+@router.post("/prime-minister", response_model=PrimeMinisterResponse)
 async def prime_minister(
     body: Date = Body(...),
     service: OrganisationService = Depends(get_organisation_service),
+    response_model=PrimeMinisterResponse,
 ):
     service_response = await service.fetch_prime_minister(selected_date=body.date)
     return service_response

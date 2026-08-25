@@ -142,3 +142,27 @@ class ActivePortfolioListResponse(BaseModel):
     newMinisters: int = Field(..., ge=0, examples=[1])
     ministriesUnderPresident: int = Field(..., ge=0, examples=[2])
     portfolioList: List[PortfolioListItem] = Field(default_factory=list)
+
+class PrimeMinisterItem(BaseModel):
+    """Matches enrich_person_data output after isPresident is dropped and term is added."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    id: str = Field(..., description="Prime Minister ID", examples=["cit-xx"])
+    name: str = Field(..., description="Prime Minister name", examples=["Test PM"])
+    isNew: bool = Field(
+        ...,
+        description="True if start_time falls on the queried date",
+        examples=[False],
+    )
+    term: str = Field(..., description="Formatted term string", examples=["2020 - 2022"])
+
+
+class PrimeMinisterResponse(BaseModel):
+    """Envelope response — body is empty when no active prime minister is found."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    body: PrimeMinisterItem | dict = Field(
+        ..., description="Prime minister details, or {} if none found for the date"
+    )

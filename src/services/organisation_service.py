@@ -18,6 +18,7 @@ from src.models import (
     DepartmentsByPortfolioResponse,
     ActivePortfolioListResponse,
     PortfolioListItem,
+    PrimeMinisterResponse,
 )
 from src.utils import Util, http_client
 
@@ -462,7 +463,7 @@ class OrganisationService:
         except Exception as e:
             raise InternalServerError("An unexpected error occurred") from e
 
-    # API: prime minister data for the given date
+        # API: prime minister data for the given date
     async def fetch_prime_minister(self, selected_date):
         """
         Fetch Prime Minister
@@ -493,7 +494,7 @@ class OrganisationService:
             )
 
             if not prime_minister_relations:
-                return {"body": {}}
+                return PrimeMinisterResponse(body={}).model_dump()
 
             first_prime_minister_relation = prime_minister_relations[0]
 
@@ -503,7 +504,7 @@ class OrganisationService:
             )
 
             if not prime_minister_data:
-                return {"body": {}}
+                return PrimeMinisterResponse(body={}).model_dump()
 
             prime_minister_data.pop("isPresident", None)
 
@@ -514,7 +515,7 @@ class OrganisationService:
 
             prime_minister_data["term"] = term
 
-            final_result = {"body": prime_minister_data}
+            final_result = PrimeMinisterResponse(body=prime_minister_data).model_dump()
 
             return final_result
 
@@ -522,7 +523,7 @@ class OrganisationService:
             raise
         except Exception as e:
             raise InternalServerError("An unexpected error occurred") from e
-
+        
     async def get_active_ministers(self, entity_id, date_active):
 
         relation = Relation(
