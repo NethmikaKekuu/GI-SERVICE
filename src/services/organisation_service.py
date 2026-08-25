@@ -20,6 +20,7 @@ from src.models import (
     PortfolioListItem,
     PrimeMinisterResponse,
     EntityNamesResponse,
+    DepartmentHistoryResponse,
 )
 from src.utils import Util, http_client
 
@@ -1051,7 +1052,7 @@ class OrganisationService:
                 for key in ["startTime", "endTime"]:
                     entry.pop(key, None)
 
-            return collapsed
+            return DepartmentHistoryResponse(root=collapsed).model_dump()
 
         except Exception as e:
             logger.error(f"Error in enrich_department_timeline: {e}")

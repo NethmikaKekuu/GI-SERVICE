@@ -173,3 +173,31 @@ class PrimeMinisterResponse(BaseModel):
 
 class EntityNamesResponse(RootModel[dict[str, str]]):
     """Maps each entity ID to its decoded display name."""
+
+
+class DepartmentHistoryItem(BaseModel):
+    """Matches one collapsed timeline entry from department_history_timeline."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    ministry_id: str = Field(..., description="Ministry ID", examples=["min-xx"])
+    ministry_name: str = Field(
+        ..., description="Ministry name", examples=["Ministry of Finance"]
+    )
+    minister_id: str | None = Field(
+        default=None,
+        description="Minister ID for this period, null if no minister/president could be resolved",
+        examples=["cit-xx"],
+    )
+    minister_name: str | None = Field(
+        default=None,
+        description="Minister name for this period, null if no minister/president could be resolved",
+        examples=["Test Minister"],
+    )
+    period: str = Field(
+        ..., description="Formatted period string", examples=["2020 - 2022"]
+    )
+
+
+class DepartmentHistoryResponse(RootModel[List[DepartmentHistoryItem]]):
+    """Timeline entries, most recent first."""

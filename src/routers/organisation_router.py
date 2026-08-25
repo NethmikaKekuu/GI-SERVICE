@@ -6,6 +6,7 @@ from src.models import (
     ActivePortfolioListResponse,
     PrimeMinisterResponse,
     EntityNamesResponse,
+    DepartmentHistoryResponse,
 )
 from src.services import OpenGINService, OrganisationService
 from typing import Sequence
@@ -92,6 +93,7 @@ async def entity_names(
     "/department-history/{department_id}",
     summary="Get department history timeline.",
     description="Returns a timeline of a department including ministry relations and ministers.",
+    response_model=DepartmentHistoryResponse,
 )
 async def department_history_timeline(
     department_id: str = Path(..., description="ID of the department"),
