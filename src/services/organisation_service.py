@@ -22,6 +22,7 @@ from src.models import (
     EntityNamesResponse,
     DepartmentHistoryResponse,
     PresidentsResponse,
+    CabinetFlowResponse,
 )
 from src.utils import Util, http_client
 
@@ -777,11 +778,11 @@ class OrganisationService:
             for node in nodes:
                 node["name"] = name_lookup.get(node["id"])
 
-            return {
-                "nodes": nodes,
-                "links": links,
-                "dates": date_status,
-            }
+            return CabinetFlowResponse(
+                nodes=nodes,
+                links=links,
+                dates=date_status,
+            ).model_dump()
         except (BadRequestError, NotFoundError):
             raise
         except Exception as e:

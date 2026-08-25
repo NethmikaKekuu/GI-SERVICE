@@ -250,3 +250,69 @@ class PresidentsResponse(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     body: List[PresidentItem] = Field(default_factory=list)
+
+
+class CabinetFlowNode(BaseModel):
+    """One node in the cabinet flow graph — a minister at a specific chart date."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    id: str = Field(..., description="Minister entity ID", examples=["cit-xx"])
+    time: str = Field(
+        ..., description="Date this node represents", examples=["2020-01-01"]
+    )
+    name: str | None = Field(
+        default=None,
+        description="Minister name, null if the name lookup failed",
+        examples=["Test Minister"],
+    )
+
+
+class CabinetFlowLink(BaseModel):
+    """One link between two nodes representing departments that moved between ministers."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    source: int = Field(
+        ..., description="Index into nodes for the source minister", examples=[0]
+    )
+    target: int = Field(
+        ..., description="Index into nodes for the target minister", examples=[1]
+    )
+    value: int = Field(
+        ..., ge=0, description="Number of departments that moved", examples=[3]
+    )
+    departmentIds: List[str] = Field(
+        ...,
+        description="Department IDs that moved along this link",
+        examples=[["dep-001", "dep-002"]],
+    )
+
+
+class CabinetFlowDateStatus(BaseModel):
+    """Per-date processing status. departmentsCount is set for ok/no_data; message is set for error."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    date: str = Field(..., description="The queried date", examples=["2020-01-01"])
+    status: str = Field(..., description="ok | no_data | error", examples=["ok"])
+    departmentsCount: int | None = Field(
+        default=None,
+        description="Number of departments found, present for ok/no_data",
+        examples=[5],
+    )
+    message: str | None = Field(
+        default=None,
+        description="Error message, present only when status is error",
+        examples=["..."],
+    )
+
+
+class CabinetFlowResponse(BaseModel):
+    """Flat response — no envelope."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    nodes: List[CabinetFlowNode] = Field(default_factory=list)
+    links: List[CabinetFlowLink] = Field(default_factory=list)
+    dates: List[CabinetFlowDateStatus] = Field(default_factory=list)

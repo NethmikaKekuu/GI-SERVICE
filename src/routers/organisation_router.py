@@ -8,6 +8,7 @@ from src.models import (
     EntityNamesResponse,
     DepartmentHistoryResponse,
     PresidentsResponse,
+    CabinetFlowResponse,
 )
 from src.services import OpenGINService, OrganisationService
 from typing import Sequence
@@ -66,6 +67,7 @@ async def cabinet_flow(
     president_id: str = Path(..., description="ID of the president"),
     dates: Sequence[str] = Body(...),
     service: OrganisationService = Depends(get_organisation_service),
+    response_model=CabinetFlowResponse,
 ):
     service_response = await service.fetch_cabinet_flow(
         president_id=president_id, dates=dates
