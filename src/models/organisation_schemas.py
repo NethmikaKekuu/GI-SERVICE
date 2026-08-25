@@ -201,3 +201,52 @@ class DepartmentHistoryItem(BaseModel):
 
 class DepartmentHistoryResponse(RootModel[List[DepartmentHistoryItem]]):
     """Timeline entries, most recent first."""
+
+
+class GazetteEntry(BaseModel):
+    """One gazette entry within a tenure's gazetteList."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    date: str = Field(..., description="Gazette publish date", examples=["2020-08-15"])
+    idList: List[str] = Field(
+        ...,
+        description="Decoded gazette IDs published on this date",
+        examples=[["EXTGZT-001", "EXTGZT-002"]],
+    )
+
+
+class Tenure(BaseModel):
+    """One presidential term."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    startDate: str = Field(..., description="Term start date", examples=["2015-01-08"])
+    endDate: str = Field(
+        ...,
+        description="Term end date, empty string if ongoing/unknown",
+        examples=["2020-11-14"],
+    )
+    gazetteList: List[GazetteEntry] = Field(default_factory=list)
+
+
+class PresidentItem(BaseModel):
+    """One president with all their terms."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    id: str = Field(..., description="President ID", examples=["cit-xx"])
+    name: str = Field(
+        ...,
+        description="President name, empty string if lookup failed",
+        examples=["Test President"],
+    )
+    tenureList: List[Tenure] = Field(default_factory=list)
+
+
+class PresidentsResponse(BaseModel):
+    """Envelope response."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    body: List[PresidentItem] = Field(default_factory=list)

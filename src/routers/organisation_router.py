@@ -7,6 +7,7 @@ from src.models import (
     PrimeMinisterResponse,
     EntityNamesResponse,
     DepartmentHistoryResponse,
+    PresidentsResponse,
 )
 from src.services import OpenGINService, OrganisationService
 from typing import Sequence
@@ -142,6 +143,7 @@ async def bodies_by_department(
     "/presidents",
     summary="Get all presidents with their term dates and gazettes sorted by date.",
     description="Returns a sorted list of presidents with their term dates and corresponding gazette ids and dates.",
+    response_model=PresidentsResponse,
 )
 async def presidents(service: OrganisationService = Depends(get_organisation_service)):
     service_response = await service.fetch_presidents()

@@ -21,6 +21,7 @@ from src.models import (
     PrimeMinisterResponse,
     EntityNamesResponse,
     DepartmentHistoryResponse,
+    PresidentsResponse,
 )
 from src.utils import Util, http_client
 
@@ -1549,7 +1550,7 @@ class OrganisationService:
                 presidents_map.values(), key=get_latest_start, reverse=True
             )
 
-            return {"body": presidents_list}
+            return PresidentsResponse(body=presidents_list).model_dump()
         except Exception as e:
             logger.error(f"Error fetching all presidents: {e}")
             raise InternalServerError("An unexpected error occurred") from e
