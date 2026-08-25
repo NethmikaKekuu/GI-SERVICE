@@ -56,18 +56,19 @@ async def departments_by_portfolio(
 async def prime_minister(
     body: Date = Body(...),
     service: OrganisationService = Depends(get_organisation_service),
-    response_model=PrimeMinisterResponse,
 ):
     service_response = await service.fetch_prime_minister(selected_date=body.date)
     return service_response
 
 
-@router.post("/cabinet-flow/{president_id}")
+@router.post(
+    "/cabinet-flow/{president_id}",
+    response_model=CabinetFlowResponse,
+)
 async def cabinet_flow(
     president_id: str = Path(..., description="ID of the president"),
     dates: Sequence[str] = Body(...),
     service: OrganisationService = Depends(get_organisation_service),
-    response_model=CabinetFlowResponse,
 ):
     service_response = await service.fetch_cabinet_flow(
         president_id=president_id, dates=dates
