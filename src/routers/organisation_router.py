@@ -5,6 +5,7 @@ from src.models import (
     BodiesByDepartmentResponse,
     ActivePortfolioListResponse,
     PrimeMinisterResponse,
+    EntityNamesResponse,
 )
 from src.services import OpenGINService, OrganisationService
 from typing import Sequence
@@ -47,6 +48,7 @@ async def departments_by_portfolio(
     )
     return service_response
 
+
 @router.post("/prime-minister", response_model=PrimeMinisterResponse)
 async def prime_minister(
     body: Date = Body(...),
@@ -73,6 +75,7 @@ async def cabinet_flow(
     "/entity-names",
     summary="Resolve entity IDs to display names.",
     description="Returns a dictionary mapping each entity ID to its decoded display name.",
+    response_model=EntityNamesResponse,
 )
 async def entity_names(
     entity_ids: list[str] = Body(

@@ -22,7 +22,8 @@ from .organisation_schemas import (
     MinisterListItem,
     PortfolioListItem,
     ActivePortfolioListResponse,
-    PrimeMinisterResponse
+    PrimeMinisterResponse,
+    EntityNamesResponse,
 )
 
 __all__ = [
@@ -50,4 +51,6 @@ __all__ = [
     "MinisterListItem",
     "PortfolioListItem",
     "ActivePortfolioListResponse",
+    "PrimeMinisterResponse",
+    "EntityNamesResponse",
 ]

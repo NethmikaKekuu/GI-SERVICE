@@ -19,6 +19,7 @@ from src.models import (
     ActivePortfolioListResponse,
     PortfolioListItem,
     PrimeMinisterResponse,
+    EntityNamesResponse,
 )
 from src.utils import Util, http_client
 
@@ -464,6 +465,7 @@ class OrganisationService:
             raise InternalServerError("An unexpected error occurred") from e
 
         # API: prime minister data for the given date
+
     async def fetch_prime_minister(self, selected_date):
         """
         Fetch Prime Minister
@@ -523,7 +525,7 @@ class OrganisationService:
             raise
         except Exception as e:
             raise InternalServerError("An unexpected error occurred") from e
-        
+
     async def get_active_ministers(self, entity_id, date_active):
 
         relation = Relation(
@@ -816,16 +818,18 @@ class OrganisationService:
     async def resolve_entity_names(self, entity_ids: Sequence[str]) -> dict[str, str]:
         """Resolve entity IDs to decoded display names."""
         if not entity_ids:
-            return {}
+            return EntityNamesResponse(root={}).model_dump()
 
         unique_ids = list(dict.fromkeys(entity_ids))
         entity_map = await self._fetch_and_map_entities(unique_ids)
 
-        return {
+        result = {
             entity_id: Util.decode_protobuf_attribute_name(entity.name)
             for entity_id, entity in entity_map.items()
             if entity.name
         }
+
+        return EntityNamesResponse(root=result).model_dump()
 
     # helper : fetch relations for multiple entities in parallel and map them by id
     async def _fetch_and_map_relations(

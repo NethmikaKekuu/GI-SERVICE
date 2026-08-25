@@ -1,6 +1,6 @@
 from typing import List
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, RootModel
 from datetime import date as _date
 
 
@@ -143,6 +143,7 @@ class ActivePortfolioListResponse(BaseModel):
     ministriesUnderPresident: int = Field(..., ge=0, examples=[2])
     portfolioList: List[PortfolioListItem] = Field(default_factory=list)
 
+
 class PrimeMinisterItem(BaseModel):
     """Matches enrich_person_data output after isPresident is dropped and term is added."""
 
@@ -155,7 +156,9 @@ class PrimeMinisterItem(BaseModel):
         description="True if start_time falls on the queried date",
         examples=[False],
     )
-    term: str = Field(..., description="Formatted term string", examples=["2020 - 2022"])
+    term: str = Field(
+        ..., description="Formatted term string", examples=["2020 - 2022"]
+    )
 
 
 class PrimeMinisterResponse(BaseModel):
@@ -166,3 +169,7 @@ class PrimeMinisterResponse(BaseModel):
     body: PrimeMinisterItem | dict = Field(
         ..., description="Prime minister details, or {} if none found for the date"
     )
+
+
+class EntityNamesResponse(RootModel[dict[str, str]]):
+    """Maps each entity ID to its decoded display name."""
