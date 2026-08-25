@@ -16,6 +16,8 @@ from src.models import (
     BodiesByDepartmentResponse,
     BodyListItem,
     DepartmentsByPortfolioResponse,
+    ActivePortfolioListResponse,
+    PortfolioListItem,
 )
 from src.utils import Util, http_client
 
@@ -206,7 +208,8 @@ class OrganisationService:
             logger.error(f"Error fetching portfolio item: {e}")
             raise InternalServerError("An unexpected error occurred") from e
 
-    # active portfolio list
+        # active portfolio list
+
     async def active_portfolio_list(self, president_id: str, selected_date: str):
         """
         Docstring for activePortfolioList
@@ -225,6 +228,7 @@ class OrganisationService:
                 {
                 "id": "",
                 "name": "",
+                "type": "",
                 "isNew": false,
                 "ministers": [
                     {
@@ -265,14 +269,14 @@ class OrganisationService:
             # the standard empty response without attempting portfolio processing.
             activePortfolioList = activePortfolioList or []
             if not activePortfolioList:
-                return {
-                    "NoOfCabinetMinistries": 0,
-                    "NoOfStateMinistries": 0,
-                    "newMinistries": 0,
-                    "newMinisters": 0,
-                    "ministriesUnderPresident": 0,
-                    "portfolioList": [],
-                }
+                return ActivePortfolioListResponse(
+                    NoOfCabinetMinistries=0,
+                    NoOfStateMinistries=0,
+                    newMinistries=0,
+                    newMinisters=0,
+                    ministriesUnderPresident=0,
+                    portfolioList=[],
+                ).model_dump()
 
             # Process each portfolio item in parallel
             results = await asyncio.gather(
@@ -301,33 +305,45 @@ class OrganisationService:
             if results and len(exceptions) == len(results):
                 raise InternalServerError("Failed to process all portfolios")
 
+            # Validate raw portfolio dicts against the response schema before
+            # doing any counting, so downstream aggregation works on a known shape.
+            try:
+                validated_portfolios = [
+                    PortfolioListItem(**p) for p in successful_portfolios
+                ]
+            except Exception as e:
+                logger.error(
+                    f"process_portfolio_item returned a payload that doesn't match "
+                    f"PortfolioListItem for president {president_id}: {e}",
+                    exc_info=True,
+                )
+                raise InternalServerError("Failed to process portfolios") from e
+
             # Calculate final counts
             newMinistries = newMinisters = ministriesUnderPresident = (
                 noOfStateMinistries
             ) = 0
 
-            for portfolio in successful_portfolios:
-                newMinistries += portfolio.get("isNew", False)
-                ministers = portfolio.get("ministers", [])
+            for portfolio in validated_portfolios:
+                newMinistries += portfolio.isNew
                 noOfStateMinistries += (
-                    1 if portfolio.get("type", "").lower() == "stateminister" else 0
+                    1 if portfolio.type.lower() == "stateminister" else 0
                 )
-                for minister in ministers:
-                    if isinstance(minister, dict):
-                        newMinisters += minister.get("isNew", False)
-                        ministriesUnderPresident += minister.get("isPresident", False)
+                for minister in portfolio.ministers:
+                    newMinisters += minister.isNew
+                    ministriesUnderPresident += minister.isPresident
 
             # final result to return
-            final_result = {
-                "NoOfCabinetMinistries": len(activePortfolioList) - noOfStateMinistries,
-                "NoOfStateMinistries": noOfStateMinistries,
-                "newMinistries": newMinistries,
-                "newMinisters": newMinisters,
-                "ministriesUnderPresident": ministriesUnderPresident,
-                "portfolioList": successful_portfolios,
-            }
+            response = ActivePortfolioListResponse(
+                NoOfCabinetMinistries=len(activePortfolioList) - noOfStateMinistries,
+                NoOfStateMinistries=noOfStateMinistries,
+                newMinistries=newMinistries,
+                newMinisters=newMinisters,
+                ministriesUnderPresident=ministriesUnderPresident,
+                portfolioList=validated_portfolios,
+            )
 
-            return final_result
+            return response.model_dump()
 
         except (BadRequestError, NotFoundError):
             raise

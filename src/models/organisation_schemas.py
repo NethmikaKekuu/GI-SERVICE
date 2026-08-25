@@ -88,3 +88,57 @@ class DepartmentsByPortfolioResponse(BaseModel):
     totalDepartments: int = 0
     newDepartments: int = 0
     departmentList: List[DepartmentItem] = Field(default_factory=list)
+
+
+class MinisterListItem(BaseModel):
+    """Matches the dict shape returned by enrich_person_data."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    id: str = Field(..., description="Minister ID", examples=["cit-xx"])
+    name: str = Field(..., description="Minister name", examples=["Test Minister"])
+    isNew: bool = Field(
+        ...,
+        description="True if start_time falls on the queried date",
+        examples=[False],
+    )
+    isPresident: bool = Field(
+        ...,
+        description="True if this minister is the current president",
+        examples=[False],
+    )
+
+
+class PortfolioListItem(BaseModel):
+    """Matches the dict shape returned by enrich_portfolio_item."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    id: str = Field(..., description="Portfolio ID", examples=["port-xx"])
+    name: str = Field(
+        ..., description="Portfolio name", examples=["Ministry of Finance"]
+    )
+    type: str = Field(
+        ...,
+        description="Portfolio kind.minor value, e.g. StateMinister",
+        examples=["StateMinister"],
+    )
+    isNew: bool = Field(
+        ...,
+        description="True if this portfolio is new as of the selected date",
+        examples=[False],
+    )
+    ministers: List[MinisterListItem] = Field(default_factory=list)
+
+
+class ActivePortfolioListResponse(BaseModel):
+    """Flat response — no envelope."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    NoOfCabinetMinistries: int = Field(..., ge=0, examples=[20])
+    NoOfStateMinistries: int = Field(..., ge=0, examples=[5])
+    newMinistries: int = Field(..., ge=0, examples=[1])
+    newMinisters: int = Field(..., ge=0, examples=[1])
+    ministriesUnderPresident: int = Field(..., ge=0, examples=[2])
+    portfolioList: List[PortfolioListItem] = Field(default_factory=list)

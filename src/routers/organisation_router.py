@@ -1,5 +1,10 @@
 from fastapi import APIRouter, Depends, Query, Body, Path
-from src.models import Date, PortfolioPersonsResponse, BodiesByDepartmentResponse
+from src.models import (
+    Date,
+    PortfolioPersonsResponse,
+    BodiesByDepartmentResponse,
+    ActivePortfolioListResponse,
+)
 from src.services import OpenGINService, OrganisationService
 from typing import Sequence
 
@@ -15,6 +20,7 @@ def get_organisation_service():
     "/active-portfolio-list",
     summary="Get active portfolio list.",
     description="Returns a list of portfolios under a given president and a given date.",
+    response_model=ActivePortfolioListResponse,
 )
 async def active_portfolio_list(
     presidentId: str = Query(..., description="ID of the president"),
