@@ -1,4 +1,8 @@
-from .data_requestbody import DataCatalogRequest, DatasetYearsRequest
+from .data_requestbody import (
+    DataCatalogRequest,
+    DatasetYearsRequest,
+    DataCatalogResponse,
+)
 from .organisation_schemas import (
     AttributeFilterRecord,
     AttributeFilterRecords,
@@ -29,4 +33,5 @@ __all__ = [
     "Relation",
     "SearchResponse",
     "SearchResult",
+    "DataCatalogResponse",
 ]
