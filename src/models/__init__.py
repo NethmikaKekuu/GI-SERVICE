@@ -2,6 +2,7 @@ from .data_requestbody import (
     DataCatalogRequest,
     DatasetYearsRequest,
     DataCatalogResponse,
+    DatasetAvailableYearsResponse
 )
 from .organisation_schemas import (
     AttributeFilterRecord,
@@ -34,4 +35,5 @@ __all__ = [
     "SearchResponse",
     "SearchResult",
     "DataCatalogResponse",
+    "DatasetAvailableYearsResponse"
 ]

@@ -43,3 +43,28 @@ class DataCatalogResponse(BaseModel):
 
     categories: List[CategoryItem] = Field(default_factory=list)
     datasets: List[DatasetItem] = Field(default_factory=list)
+
+class DatasetYearsRequest(BaseModel):
+    datasetIds: list[str] = Field(..., description="List of dataset IDs")
+
+
+class DatasetYearEntry(BaseModel):
+    """One available year for a dataset group."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    datasetId: str = Field(..., description="Dataset entity ID for this year", examples=["ds_2022"])
+    year: str = Field(
+        ...,
+        description="Year extracted from the entity's created date, 'Unknown' if unavailable",
+        examples=["2022"],
+    )
+
+
+class DatasetAvailableYearsResponse(BaseModel):
+    """Flat response — no envelope."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    name: str = Field(..., description="Common dataset name, title-cased with year removed", examples=["Population"])
+    years: List[DatasetYearEntry] = Field(default_factory=list)

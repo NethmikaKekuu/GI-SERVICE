@@ -1,6 +1,6 @@
 from fastapi.param_functions import Depends, Path
 from fastapi import APIRouter
-from src.models import DataCatalogRequest, DatasetYearsRequest, DataCatalogResponse
+from src.models import DataCatalogRequest, DatasetYearsRequest, DataCatalogResponse, DatasetAvailableYearsResponse
 
 from src.services import DataService, OpenGINService
 
@@ -29,6 +29,7 @@ async def get_data_catalog(
     "/datasets/years",
     summary="Get all the dataset available years for the given datasets.",
     description="Returns the list of years and datasetIds for available datasets with dataset name.",
+    router=DatasetAvailableYearsResponse,
 )
 async def get_dataset_available_years(
     request: DatasetYearsRequest, service: DataService = Depends(get_data_service)
