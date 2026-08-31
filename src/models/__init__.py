@@ -8,6 +8,10 @@ from .data_requestbody import (
     TabularData,
     DataAttributesResponse,
     DataAttributesNotFoundResponse,
+    EntityKind,
+    DatasetInfo,
+    CategoryHierarchyItem,
+    DatasetCategoriesResponse,
 )
 from .organisation_schemas import (
     AttributeFilterRecord,
@@ -46,4 +50,8 @@ __all__ = [
     "TabularData",
     "DataAttributesResponse",
     "DataAttributesNotFoundResponse",
+    "EntityKind",
+    "DatasetInfo",
+    "CategoryHierarchyItem",
+    "DatasetCategoriesResponse",
 ]
