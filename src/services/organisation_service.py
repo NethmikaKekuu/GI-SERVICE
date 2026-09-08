@@ -1194,7 +1194,7 @@ class OrganisationService:
                 newCount=new_count,
                 personList=validated_persons,
             )
-            return response.model_dump()
+            return response
 
         except (BadRequestError, NotFoundError):
             raise
