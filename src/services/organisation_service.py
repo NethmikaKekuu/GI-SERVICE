@@ -1390,7 +1390,7 @@ class OrganisationService:
             bodyList=bodies,
         )
 
-        return response.model_dump()
+        return response
 
     # API: fetch presidents with terms and gazettes sorted by date
     async def fetch_presidents(self):

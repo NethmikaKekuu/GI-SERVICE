@@ -12,7 +12,8 @@ from src.models import (
     CabinetFlowResponse,
     EntityNamesResponse,
     DepartmentHistoryResponse,
-    PortfolioPersonsResponse
+    PortfolioPersonsResponse,
+    BodiesByDepartmentResponse,
 )
 
 
@@ -1797,24 +1798,18 @@ async def test_bodies_by_department_success(organisation_service, mock_opengin_s
             department_id=department_id, selected_date=selected_date
         )
 
-    assert result == {
-        "totalBodies": 2,
-        "newBodies": 1,
-        "bodyList": [
-            {
-                "id": "body_1",
-                "name": "Body 1 Name",
-                "isNew": True,
-                "type": "Council",
-            },
-            {
-                "id": "body_2",
-                "name": "Body 2 Name",
-                "isNew": False,
-                "type": "",
-            },
-        ],
-    }
+    assert isinstance(result, BodiesByDepartmentResponse)
+    assert result.totalBodies == 2
+    assert result.newBodies == 1
+    assert len(result.bodyList) == 2
+    assert result.bodyList[0].id == "body_1"
+    assert result.bodyList[0].name == "Body 1 Name"
+    assert result.bodyList[0].isNew is True
+    assert result.bodyList[0].type == "Council"
+    assert result.bodyList[1].id == "body_2"
+    assert result.bodyList[1].name == "Body 2 Name"
+    assert result.bodyList[1].isNew is False
+    assert result.bodyList[1].type == ""
 
     mock_opengin_service.get_entities.assert_called_once_with(
         entity=Entity(id=department_id)
@@ -1875,18 +1870,14 @@ async def test_bodies_by_department_partial_enrichment_failure(
             department_id=department_id, selected_date=selected_date
         )
 
-    assert result == {
-        "totalBodies": 1,
-        "newBodies": 1,
-        "bodyList": [
-            {
-                "id": "body_1",
-                "name": "Body 1 Name",
-                "isNew": True,
-                "type": "Council",
-            }
-        ],
-    }
+    assert isinstance(result, BodiesByDepartmentResponse)
+    assert result.totalBodies == 1
+    assert result.newBodies == 1
+    assert len(result.bodyList) == 1
+    assert result.bodyList[0].id == "body_1"
+    assert result.bodyList[0].name == "Body 1 Name"
+    assert result.bodyList[0].isNew is True
+    assert result.bodyList[0].type == "Council"
 
 
 @pytest.mark.asyncio
@@ -2076,6 +2067,7 @@ async def test_get_persons_by_portfolio_no_minister_no_president_raises_not_foun
             portfolio_id=portfolio_id, selected_date=selected_date
         )
 
+
 @pytest.mark.asyncio
 async def test_get_persons_by_portfolio_appointed_minister_success(
     organisation_service, mock_opengin_service
@@ -2138,6 +2130,7 @@ async def test_get_persons_by_portfolio_appointed_minister_success(
         selected_date=selected_date,
     )
 
+
 @pytest.mark.asyncio
 async def test_get_persons_by_portfolio_minister_who_is_president_flagged_true(
     organisation_service, mock_opengin_service
@@ -2189,56 +2182,7 @@ async def test_get_persons_by_portfolio_minister_who_is_president_flagged_true(
 
     assert isinstance(result, PortfolioPersonsResponse)
     assert result.personList[0].isPresident is True
-@pytest.mark.asyncio
-async def test_get_persons_by_portfolio_new_minister_counted(
-    organisation_service, mock_opengin_service
-):
-    portfolio_id = "min-12"
-    selected_date = "2026-04-21"
-    president_id = "pres_123"
-    minister_relation = Relation(
-        relatedEntityId="cit_minister_1",
-        startTime=Util.normalize_timestamp(selected_date),
-        endTime="2030-01-01T00:00:00Z",
-    )
 
-    mock_opengin_service.get_entities.return_value = [
-        Entity(id=portfolio_id, name="mocked_protobuf_name")
-    ]
-
-    async def fetch_relation_handler(entityId, relation):
-        if (
-            entityId == EntityIdEnum.GOVERNMENT.value
-            and relation.name == RelationNameEnum.AS_PRESIDENT.value
-        ):
-            return [Relation(relatedEntityId=president_id)]
-        if (
-            entityId == portfolio_id
-            and relation.name == RelationNameEnum.AS_APPOINTED.value
-        ):
-            return [minister_relation]
-        return []
-
-    mock_opengin_service.fetch_relation.side_effect = fetch_relation_handler
-
-    with patch(
-        "src.services.organisation_service.OrganisationService.enrich_person_data",
-        new_callable=AsyncMock,
-    ) as mock_enrich_person:
-        mock_enrich_person.return_value = {
-            "id": "cit_minister_1",
-            "name": "New Minister",
-            "isNew": True,
-            "isPresident": False,
-        }
-
-        result = await organisation_service.get_persons_by_portfolio(
-            portfolio_id=portfolio_id, selected_date=selected_date
-        )
-
-    assert isinstance(result, PortfolioPersonsResponse)
-    assert result.newCount == 1
-    assert result.totalCount == 1
 
 @pytest.mark.asyncio
 async def test_get_persons_by_portfolio_new_minister_counted(
@@ -2290,6 +2234,7 @@ async def test_get_persons_by_portfolio_new_minister_counted(
     assert isinstance(result, PortfolioPersonsResponse)
     assert result.newCount == 1
     assert result.totalCount == 1
+
 
 @pytest.mark.asyncio
 async def test_get_persons_by_portfolio_partial_enrichment_failure_is_skipped(
@@ -2353,6 +2298,7 @@ async def test_get_persons_by_portfolio_partial_enrichment_failure_is_skipped(
     assert isinstance(result, PortfolioPersonsResponse)
     assert result.totalCount == 1
     assert result.personList[0].id == "cit_ok"
+
 
 @pytest.mark.asyncio
 async def test_get_persons_by_portfolio_all_enrichment_failures_raises_internal_server_error(
