@@ -10,7 +10,8 @@ from src.models import (
     DepartmentsByPortfolioResponse,
     PrimeMinisterResponse,
     CabinetFlowResponse,
-    EntityNamesResponse
+    EntityNamesResponse,
+    DepartmentHistoryResponse,
 )
 
 
@@ -683,7 +684,9 @@ async def test_department_history_timeline_success(
     )
 
     assert result is not None
-    assert isinstance(result, list)
+    assert isinstance(result, DepartmentHistoryResponse)
+
+    timeline = result.root
 
     # We expect:
     # 1. 2021-12-01 to 2022-01-01: Ministry Two - Gap (filled by President X)
@@ -697,15 +700,15 @@ async def test_department_history_timeline_success(
     # In this test, min_01 and min_02 have different names ("Ministry One" vs "Ministry Two"),
     # so Minister A won't collapse across them.
 
-    assert len(result) == 6
-    assert result[0]["minister_name"] == "President X"
-    assert result[1]["minister_name"] == "Minister A"
-    assert result[1]["ministry_name"] == "Ministry Two"
-    assert result[4]["minister_name"] == "Minister A"
-    assert result[4]["ministry_name"] == "Ministry One"
-    assert "period" in result[0]
-    assert "startTime" not in result[0]
-    assert "endTime" not in result[0]
+    assert len(timeline) == 6
+    assert timeline[0].minister_name == "President X"
+    assert timeline[1].minister_name == "Minister A"
+    assert timeline[1].ministry_name == "Ministry Two"
+    assert timeline[4].minister_name == "Minister A"
+    assert timeline[4].ministry_name == "Ministry One"
+    assert timeline[0].period is not None
+    assert not hasattr(timeline[0], "startTime")
+    assert not hasattr(timeline[0], "endTime")
 
 
 @pytest.mark.asyncio
@@ -770,10 +773,13 @@ async def test_department_history_timeline_collapsing(
         department_id=department_id
     )
 
+    assert isinstance(result, DepartmentHistoryResponse)
+    timeline = result.root
+
     # Should collapse into ONE entry because same name and same person across min_01 and min_02
-    assert len(result) == 1
-    assert result[0]["minister_name"] == "Ranil"
-    assert result[0]["period"] == "2020-01-01 - 2022-01-01"
+    assert len(timeline) == 1
+    assert timeline[0].minister_name == "Ranil"
+    assert timeline[0].period == "2020-01-01 - 2022-01-01"
 
 
 @pytest.mark.asyncio
@@ -853,7 +859,7 @@ async def test_resolve_entity_names_success(organisation_service, mock_opengin_s
     ):
         result = await organisation_service.resolve_entity_names(entity_ids)
 
-    assert isinstance(result,EntityNamesResponse)
+    assert isinstance(result, EntityNamesResponse)
     assert result.root == {
         "e1": "decoded_encoded_name_1",
         "e2": "decoded_encoded_name_2",
@@ -995,9 +1001,7 @@ async def test_department_moves_between_ministers(organisation_service):
     assert total_flow == 4
 
     all_department_ids = {
-        department_id
-        for link in result.links
-        for department_id in link.departmentIds
+        department_id for link in result.links for department_id in link.departmentIds
     }
     assert all_department_ids == {"dep175", "dep176", "dep177", "dep182"}
     for link in result.links:
@@ -1022,7 +1026,7 @@ async def test_no_departments(organisation_service):
         "pres1", ["2024-01-01", "2024-01-02"]
     )
 
-    assert isinstance(result,CabinetFlowResponse)
+    assert isinstance(result, CabinetFlowResponse)
 
     assert result.nodes == []
     assert result.links == []
@@ -1070,7 +1074,7 @@ async def test_no_departments_for_one_date(organisation_service):
         president_id="pres1", dates=["2024-01-01", "2024-02-01"]
     )
 
-    assert isinstance(result,CabinetFlowResponse)
+    assert isinstance(result, CabinetFlowResponse)
 
     # no movement on departments since the second date is empty
     assert len(result.links) == 0
@@ -1149,9 +1153,7 @@ async def test_bridge_across_empty_middle_date(organisation_service):
     assert total_flow == 4
 
     all_department_ids = {
-         department_id
-         for link in result.links
-         for department_id in link.departmentIds
+        department_id for link in result.links for department_id in link.departmentIds
     }
     assert all_department_ids == {"dep175", "dep176", "dep177", "dep182"}
 
@@ -1159,6 +1161,7 @@ async def test_bridge_across_empty_middle_date(organisation_service):
     assert node_times == {"2024-01-01", "2024-03-01"}
 
     assert organisation_service.get_ministers_and_departments.call_count == 3
+
 
 @pytest.mark.asyncio
 async def test_one_date_failure(organisation_service):
@@ -1185,6 +1188,7 @@ async def test_one_date_failure(organisation_service):
 
     assert result.dates[0].status == "error"
     assert result.dates[1].status == "ok"
+
 
 @pytest.mark.asyncio
 async def test_invalid_response_type(organisation_service):
@@ -1240,7 +1244,7 @@ async def test_multiple_departments_aggregation(organisation_service):
     )
 
     assert isinstance(result, CabinetFlowResponse)
-    
+
     # There should be exactly one link (min1 -> min2)
     assert len(result.links) == 1
 

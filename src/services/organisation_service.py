@@ -1055,7 +1055,7 @@ class OrganisationService:
                 for key in ["startTime", "endTime"]:
                     entry.pop(key, None)
 
-            return DepartmentHistoryResponse(root=collapsed).model_dump()
+            return DepartmentHistoryResponse(root=collapsed)
 
         except Exception as e:
             logger.error(f"Error in enrich_department_timeline: {e}")
