@@ -353,6 +353,7 @@ class OrganisationService:
         except (BadRequestError, NotFoundError):
             raise
         except Exception as e:
+            print(e)
             raise InternalServerError("An unexpected error occurred") from e
 
     # helper: enrich department
@@ -782,7 +783,7 @@ class OrganisationService:
                 nodes=nodes,
                 links=links,
                 dates=date_status,
-            ).model_dump()
+            )
         except (BadRequestError, NotFoundError):
             raise
         except Exception as e:

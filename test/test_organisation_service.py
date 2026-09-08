@@ -9,6 +9,7 @@ from src.models import (
     ActivePortfolioListResponse,
     DepartmentsByPortfolioResponse,
     PrimeMinisterResponse,
+    CabinetFlowResponse
 )
 
 
@@ -559,7 +560,7 @@ async def test_prime_minister_with_no_relation(
     )
 
     assert isinstance(result, PrimeMinisterResponse)
-    assert result.model_dump() == {"body": {}}
+    assert result == PrimeMinisterResponse(body={})
 
 
 @pytest.mark.asyncio
@@ -979,28 +980,30 @@ async def test_department_moves_between_ministers(organisation_service):
         president_id="pres1", dates=["2024-01-01", "2024-02-01"]
     )
 
-    # 2 departments moved (dep177 and dep176)
-    assert len(result["links"]) == 3
+    assert isinstance(result, CabinetFlowResponse)
 
-    # total movements should equal 4
-    total_flow = sum(link["value"] for link in result["links"])
+    # 2 departments moved (dep177 and dep176)
+    assert len(result.links) == 3
+
+    # # total movements should equal 4
+    total_flow = sum(link.value for link in result.links)
     assert total_flow == 4
 
     all_department_ids = {
         department_id
-        for link in result["links"]
-        for department_id in link["departmentIds"]
+        for link in result.links
+        for department_id in link.departmentIds
     }
     assert all_department_ids == {"dep175", "dep176", "dep177", "dep182"}
-    for link in result["links"]:
-        assert link["value"] == len(link["departmentIds"])
+    for link in result.links:
+        assert link.value == len(link.departmentIds)
 
     # nodes should exist
-    assert len(result["nodes"]) > 0
+    assert len(result.nodes) > 0
 
     # date statuses should be ok
-    assert result["dates"][0]["status"] == "ok"
-    assert result["dates"][1]["status"] == "ok"
+    assert result.dates[0].status == "ok"
+    assert result.dates[1].status == "ok"
 
     # dependency should be called once per date
     assert organisation_service.get_ministers_and_departments.call_count == 2
@@ -1014,12 +1017,14 @@ async def test_no_departments(organisation_service):
         "pres1", ["2024-01-01", "2024-01-02"]
     )
 
-    assert result["nodes"] == []
-    assert result["links"] == []
-    assert result["dates"][0]["status"] == "no_data"
-    assert result["dates"][0]["departmentsCount"] == 0
-    assert result["dates"][1]["status"] == "no_data"
-    assert result["dates"][1]["departmentsCount"] == 0
+    assert isinstance(result,CabinetFlowResponse)
+
+    assert result.nodes == []
+    assert result.links == []
+    assert result.dates[0].status == "no_data"
+    assert result.dates[0].departmentsCount == 0
+    assert result.dates[1].status == "no_data"
+    assert result.dates[1].departmentsCount == 0
 
 
 @pytest.mark.asyncio
@@ -1060,22 +1065,24 @@ async def test_no_departments_for_one_date(organisation_service):
         president_id="pres1", dates=["2024-01-01", "2024-02-01"]
     )
 
+    assert isinstance(result,CabinetFlowResponse)
+
     # no movement on departments since the second date is empty
-    assert len(result["links"]) == 0
+    assert len(result.links) == 0
 
     # total movements should equal 0
-    total_flow = sum(link["value"] for link in result["links"])
+    total_flow = sum(link.value for link in result.links)
     assert total_flow == 0
 
     # nodes should exist
-    assert len(result["nodes"]) > 0
-    assert len(result["nodes"]) == 4
+    assert len(result.nodes) > 0
+    assert len(result.nodes) == 4
 
     # date statuses should be ok and one date should be no_data
-    assert result["dates"][0]["status"] == "ok"
-    assert result["dates"][0]["departmentsCount"] == 4
-    assert result["dates"][1]["status"] == "no_data"
-    assert result["dates"][1]["departmentsCount"] == 0
+    assert result.dates[0].status == "ok"
+    assert result.dates[0].departmentsCount == 4
+    assert result.dates[1].status == "no_data"
+    assert result.dates[1].departmentsCount == 0
 
     # dependency should be called once per date
     assert organisation_service.get_ministers_and_departments.call_count == 2
@@ -1122,30 +1129,31 @@ async def test_bridge_across_empty_middle_date(organisation_service):
         dates=["2024-01-01", "2024-02-01", "2024-03-01"],
     )
 
-    assert result["dates"][0]["status"] == "ok"
-    assert result["dates"][0]["departmentsCount"] == 4
-    assert result["dates"][1]["status"] == "no_data"
-    assert result["dates"][1]["departmentsCount"] == 0
-    assert result["dates"][2]["status"] == "ok"
-    assert result["dates"][2]["departmentsCount"] == 4
+    assert isinstance(result, CabinetFlowResponse)
+
+    assert result.dates[0].status == "ok"
+    assert result.dates[0].departmentsCount == 4
+    assert result.dates[1].status == "no_data"
+    assert result.dates[1].departmentsCount == 0
+    assert result.dates[2].status == "ok"
+    assert result.dates[2].departmentsCount == 4
 
     # links bridge across the empty middle date (same as two consecutive ok dates)
-    assert len(result["links"]) == 3
-    total_flow = sum(link["value"] for link in result["links"])
+    assert len(result.links) == 3
+    total_flow = sum(link.value for link in result.links)
     assert total_flow == 4
 
     all_department_ids = {
-        department_id
-        for link in result["links"]
-        for department_id in link["departmentIds"]
+         department_id
+         for link in result.links
+         for department_id in link.departmentIds
     }
     assert all_department_ids == {"dep175", "dep176", "dep177", "dep182"}
 
-    node_times = {node["time"] for node in result["nodes"]}
+    node_times = {node.time for node in result.nodes}
     assert node_times == {"2024-01-01", "2024-03-01"}
 
     assert organisation_service.get_ministers_and_departments.call_count == 3
-
 
 @pytest.mark.asyncio
 async def test_one_date_failure(organisation_service):
@@ -1168,9 +1176,10 @@ async def test_one_date_failure(organisation_service):
         "pres1", ["2024-01-01", "2024-02-01"]
     )
 
-    assert result["dates"][0]["status"] == "error"
-    assert result["dates"][1]["status"] == "ok"
+    assert isinstance(result, CabinetFlowResponse)
 
+    assert result.dates[0].status == "error"
+    assert result.dates[1].status == "ok"
 
 @pytest.mark.asyncio
 async def test_invalid_response_type(organisation_service):
@@ -1182,8 +1191,10 @@ async def test_invalid_response_type(organisation_service):
         "pres1", ["2024-01-01", "2024-01-02"]
     )
 
-    assert result["dates"][0]["status"] == "error"
-    assert result["dates"][1]["status"] == "error"
+    assert isinstance(result, CabinetFlowResponse)
+
+    assert result.dates[0].status == "error"
+    assert result.dates[1].status == "error"
 
 
 @pytest.mark.asyncio
@@ -1223,21 +1234,23 @@ async def test_multiple_departments_aggregation(organisation_service):
         president_id="pres1", dates=["2024-01-01", "2024-02-01"]
     )
 
+    assert isinstance(result, CabinetFlowResponse)
+    
     # There should be exactly one link (min1 -> min2)
-    assert len(result["links"]) == 1
+    assert len(result.links) == 1
 
     # The value should be 2 because two departments moved along this path
-    link = result["links"][0]
-    assert link["value"] == 2
-    assert set(link["departmentIds"]) == {"dep1", "dep2"}
+    link = result.links[0]
+    assert link.value == 2
+    assert set(link.departmentIds) == {"dep1", "dep2"}
 
     # Nodes should exist for both ministers
-    node_ids = {node["id"] for node in result["nodes"]}
+    node_ids = {node.id for node in result.nodes}
     assert node_ids == {"min1", "min2"}
 
     # Dates statuses should both be "ok"
-    assert result["dates"][0]["status"] == "ok"
-    assert result["dates"][1]["status"] == "ok"
+    assert result.dates[0].status == "ok"
+    assert result.dates[1].status == "ok"
 
     # Dependency should be called once per date
     assert organisation_service.get_ministers_and_departments.call_count == 2
