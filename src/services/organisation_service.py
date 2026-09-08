@@ -499,7 +499,7 @@ class OrganisationService:
             )
 
             if not prime_minister_relations:
-                return PrimeMinisterResponse(body={}).model_dump()
+                return PrimeMinisterResponse(body={})
 
             first_prime_minister_relation = prime_minister_relations[0]
 
@@ -509,7 +509,7 @@ class OrganisationService:
             )
 
             if not prime_minister_data:
-                return PrimeMinisterResponse(body={}).model_dump()
+                return PrimeMinisterResponse(body={})
 
             prime_minister_data.pop("isPresident", None)
 
@@ -520,7 +520,7 @@ class OrganisationService:
 
             prime_minister_data["term"] = term
 
-            final_result = PrimeMinisterResponse(body=prime_minister_data).model_dump()
+            final_result = PrimeMinisterResponse(body=prime_minister_data)
 
             return final_result
 

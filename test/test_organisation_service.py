@@ -5,7 +5,11 @@ from src.enums import EntityIdEnum, RelationDirectionEnum, RelationNameEnum
 from src.exception import BadRequestError, InternalServerError, NotFoundError
 from src.models import Entity, Relation
 from src.utils import Util
-from src.models import ActivePortfolioListResponse, DepartmentsByPortfolioResponse
+from src.models import (
+    ActivePortfolioListResponse,
+    DepartmentsByPortfolioResponse,
+    PrimeMinisterResponse,
+)
 
 
 @pytest.mark.asyncio
@@ -462,14 +466,16 @@ async def test_prime_minister_success(organisation_service, mock_opengin_service
             selected_date=selected_date
         )
 
-    assert result == {
-        "body": {
+    assert isinstance(result, PrimeMinisterResponse)
+
+    assert result == PrimeMinisterResponse(
+        body={
             "id": "person_123",
             "name": "Person X",
             "isNew": False,
             "term": "2022 Jul - 2024 Sep",
         }
-    }
+    )
 
     # Check fetch_relation was called correctly
     mock_opengin_service.fetch_relation.assert_called_once_with(
@@ -510,7 +516,8 @@ async def test_prime_minister_without_person_data(
             selected_date=selected_date
         )
 
-    assert result == {"body": {}}
+    assert isinstance(result, PrimeMinisterResponse)
+    assert result == PrimeMinisterResponse(body={})
 
     # Check fetch_relation was called correctly
     mock_opengin_service.fetch_relation.assert_called_with(
@@ -550,7 +557,9 @@ async def test_prime_minister_with_no_relation(
     result = await organisation_service.fetch_prime_minister(
         selected_date=selected_date
     )
-    assert result == {"body": {}}
+
+    assert isinstance(result, PrimeMinisterResponse)
+    assert result.model_dump() == {"body": {}}
 
 
 @pytest.mark.asyncio
