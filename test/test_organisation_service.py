@@ -5,6 +5,7 @@ from src.enums import EntityIdEnum, RelationDirectionEnum, RelationNameEnum
 from src.exception import BadRequestError, InternalServerError, NotFoundError
 from src.models import Entity, Relation
 from src.utils import Util
+from src.models import ActivePortfolioListResponse, DepartmentsByPortfolioResponse
 
 
 @pytest.mark.asyncio
@@ -253,13 +254,15 @@ async def test_active_portfolio_list_valid_president_id(
             president_id=president_id, selected_date=selected_date
         )
 
-    assert result == {
-        "NoOfCabinetMinistries": 1,
-        "NoOfStateMinistries": 0,
-        "newMinistries": 0,
-        "newMinisters": 0,
-        "ministriesUnderPresident": 0,
-        "portfolioList": [
+    assert isinstance(result, ActivePortfolioListResponse)
+
+    assert result == ActivePortfolioListResponse(
+        NoOfCabinetMinistries=1,
+        NoOfStateMinistries=0,
+        newMinistries=0,
+        newMinisters=0,
+        ministriesUnderPresident=0,
+        portfolioList=[
             {
                 "id": "portfolio_123",
                 "name": "Portfolio X",
@@ -268,7 +271,7 @@ async def test_active_portfolio_list_valid_president_id(
                 "ministers": [],
             }
         ],
-    }
+    )
 
     mock_opengin_service.get_entities.assert_called_once_with(
         entity=Entity(id=president_id)
@@ -309,14 +312,16 @@ async def test_active_portfolio_list_valid_president_without_active_relations(
             president_id=president_id, selected_date=selected_date
         )
 
-    assert result == {
-        "NoOfCabinetMinistries": 0,
-        "NoOfStateMinistries": 0,
-        "newMinistries": 0,
-        "newMinisters": 0,
-        "ministriesUnderPresident": 0,
-        "portfolioList": [],
-    }
+    assert isinstance(result, ActivePortfolioListResponse)
+
+    assert result == ActivePortfolioListResponse(
+        NoOfCabinetMinistries=0,
+        NoOfStateMinistries=0,
+        newMinisters=0,
+        newMinistries=0,
+        ministriesUnderPresident=0,
+        portfolioList=[],
+    )
     mock_process_portfolio_item.assert_not_awaited()
 
 
@@ -353,6 +358,7 @@ async def test_departments_by_portfolio_id_success(
             portfolio_id=portfolio_id, selected_date=selected_date
         )
 
+    assert isinstance(result, DepartmentsByPortfolioResponse)
     assert result.model_dump() == {
         "totalDepartments": 1,
         "newDepartments": 0,

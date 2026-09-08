@@ -281,7 +281,7 @@ class OrganisationService:
                     newMinisters=0,
                     ministriesUnderPresident=0,
                     portfolioList=[],
-                ).model_dump()
+                )
 
             # Process each portfolio item in parallel
             results = await asyncio.gather(
@@ -348,7 +348,7 @@ class OrganisationService:
                 portfolioList=validated_portfolios,
             )
 
-            return response.model_dump()
+            return response
 
         except (BadRequestError, NotFoundError):
             raise
