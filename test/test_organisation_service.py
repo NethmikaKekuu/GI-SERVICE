@@ -9,7 +9,8 @@ from src.models import (
     ActivePortfolioListResponse,
     DepartmentsByPortfolioResponse,
     PrimeMinisterResponse,
-    CabinetFlowResponse
+    CabinetFlowResponse,
+    EntityNamesResponse
 )
 
 
@@ -852,7 +853,8 @@ async def test_resolve_entity_names_success(organisation_service, mock_opengin_s
     ):
         result = await organisation_service.resolve_entity_names(entity_ids)
 
-    assert result == {
+    assert isinstance(result,EntityNamesResponse)
+    assert result.root == {
         "e1": "decoded_encoded_name_1",
         "e2": "decoded_encoded_name_2",
     }
@@ -875,13 +877,16 @@ async def test_resolve_entity_names_partial_failure(
     ):
         result = await organisation_service.resolve_entity_names(entity_ids)
 
-    assert result == {"e1": "decoded_encoded_name_1"}
+    assert isinstance(result, EntityNamesResponse)
+
+    assert result.root == {"e1": "decoded_encoded_name_1"}
 
 
 @pytest.mark.asyncio
 async def test_resolve_entity_names_empty_list(organisation_service):
     result = await organisation_service.resolve_entity_names([])
-    assert result == {}
+    assert isinstance(result, EntityNamesResponse)
+    assert result.root == {}
 
 
 @pytest.mark.asyncio
@@ -985,7 +990,7 @@ async def test_department_moves_between_ministers(organisation_service):
     # 2 departments moved (dep177 and dep176)
     assert len(result.links) == 3
 
-    # # total movements should equal 4
+    # total movements should equal 4
     total_flow = sum(link.value for link in result.links)
     assert total_flow == 4
 

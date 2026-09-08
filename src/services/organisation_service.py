@@ -822,7 +822,7 @@ class OrganisationService:
     async def resolve_entity_names(self, entity_ids: Sequence[str]) -> dict[str, str]:
         """Resolve entity IDs to decoded display names."""
         if not entity_ids:
-            return EntityNamesResponse(root={}).model_dump()
+            return EntityNamesResponse(root={})
 
         unique_ids = list(dict.fromkeys(entity_ids))
         entity_map = await self._fetch_and_map_entities(unique_ids)
@@ -833,7 +833,7 @@ class OrganisationService:
             if entity.name
         }
 
-        return EntityNamesResponse(root=result).model_dump()
+        return EntityNamesResponse(root=result)
 
     # helper : fetch relations for multiple entities in parallel and map them by id
     async def _fetch_and_map_relations(
