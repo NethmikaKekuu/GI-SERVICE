@@ -1,4 +1,3 @@
-import json
 import pytest
 from unittest.mock import AsyncMock, patch, MagicMock
 from src.enums import EntityIdEnum, RelationDirectionEnum, RelationNameEnum
@@ -14,6 +13,7 @@ from src.models import (
     DepartmentHistoryResponse,
     PortfolioPersonsResponse,
     BodiesByDepartmentResponse,
+    PresidentsResponse,
 )
 
 
@@ -1292,29 +1292,30 @@ async def test_fetch_presidents_success(organisation_service, mock_opengin_servi
     ):
         result = await organisation_service.fetch_presidents()
 
-        presidents = result["body"]
+        assert isinstance(result, PresidentsResponse)
+        presidents = result.body
         assert len(presidents) == 1
         president = presidents[0]
-        assert president["id"] == "p1"
-        assert president["name"] == "President One"
-        assert len(president["tenureList"]) == 2
+        assert president.id == "p1"
+        assert president.name == "President One"
+        assert len(president.tenureList) == 2
 
         # Check gazettes are inside the first term (2020 term)
-        term1_gazettes = president["tenureList"][0]["gazetteList"]
+        term1_gazettes = president.tenureList[0].gazetteList
         assert len(term1_gazettes) == 1
-        assert term1_gazettes[0]["date"] == "2020-05-01"
-        assert isinstance(term1_gazettes[0]["idList"], list)
-        assert term1_gazettes[0]["idList"] == ["org_gzt"]
+        assert term1_gazettes[0].date == "2020-05-01"
+        assert isinstance(term1_gazettes[0].idList, list)
+        assert term1_gazettes[0].idList == ["org_gzt"]
 
         # Check gazettes are inside the second term (2022 term)
-        term2_gazettes = president["tenureList"][1]["gazetteList"]
+        term2_gazettes = president.tenureList[1].gazetteList
         assert len(term2_gazettes) == 1
-        assert term2_gazettes[0]["date"] == "2022-08-01"
-        assert isinstance(term2_gazettes[0]["idList"], list)
-        assert term2_gazettes[0]["idList"] == ["per_gzt"]
+        assert term2_gazettes[0].date == "2022-08-01"
+        assert isinstance(term2_gazettes[0].idList, list)
+        assert term2_gazettes[0].idList == ["per_gzt"]
 
         # Verify JSON serializability of the entire response
-        json_output = json.dumps(result)
+        json_output = result.model_dump_json()
         assert isinstance(json_output, str)
 
 
@@ -1324,7 +1325,8 @@ async def test_fetch_presidents_no_data(organisation_service, mock_opengin_servi
 
     result = await organisation_service.fetch_presidents()
 
-    assert result == {"body": []}
+    assert isinstance(result, PresidentsResponse)
+    assert result.body == []
 
 
 @pytest.mark.asyncio
@@ -1345,10 +1347,11 @@ async def test_fetch_presidents_no_gazettes(organisation_service, mock_opengin_s
     ):
         result = await organisation_service.fetch_presidents()
 
-        presidents = result["body"]
+        assert isinstance(result, PresidentsResponse)
+        presidents = result.body
         assert len(presidents) == 1
-        assert presidents[0]["name"] == "President One"
-        assert presidents[0]["tenureList"][0]["gazetteList"] == []
+        assert presidents[0].name == "President One"
+        assert presidents[0].tenureList[0].gazetteList == []
 
 
 @pytest.mark.asyncio
@@ -1389,11 +1392,12 @@ async def test_fetch_presidents_sorting_with_multiple_terms(
     ):
         result = await organisation_service.fetch_presidents()
 
-        presidents = result["body"]
+        assert isinstance(result, PresidentsResponse)
+        presidents = result.body
 
         # p_multi should be first because 2022 > 2010
-        assert presidents[0]["id"] == "p_multi"
-        assert presidents[1]["id"] == "p_old"
+        assert presidents[0].id == "p_multi"
+        assert presidents[1].id == "p_old"
 
 
 @pytest.mark.asyncio
@@ -1414,7 +1418,6 @@ async def test_fetch_presidents_gazette_on_last_day_of_tenure_is_included(
     A gazette published on the EXACT endDate of a tenure must be included
     in that tenure's gazetteList.
     """
-    # p1 has a single tenure ending on 2022-01-01
     mock_opengin_service.fetch_relation.return_value = [
         Relation(
             relatedEntityId="p1",
@@ -1423,7 +1426,6 @@ async def test_fetch_presidents_gazette_on_last_day_of_tenure_is_included(
         ),
     ]
 
-    # The gazette is published on the exact last day of p1's tenure
     mock_opengin_service.get_entities.side_effect = [
         [
             Entity(created="2022-01-01T00:00:00Z", name="last_day_gazette")
@@ -1438,20 +1440,21 @@ async def test_fetch_presidents_gazette_on_last_day_of_tenure_is_included(
     ):
         result = await organisation_service.fetch_presidents()
 
-        presidents = result["body"]
+        assert isinstance(result, PresidentsResponse)
+        presidents = result.body
         assert len(presidents) == 1
         president = presidents[0]
-        assert president["id"] == "p1"
-        assert president["name"] == "President One"
-        assert len(president["tenureList"]) == 1
+        assert president.id == "p1"
+        assert president.name == "President One"
+        assert len(president.tenureList) == 1
 
-        tenure = president["tenureList"][0]
-        assert tenure["endDate"] == "2022-01-01"
+        tenure = president.tenureList[0]
+        assert tenure.endDate == "2022-01-01"
 
         # The gazette on the exact last day must be INCLUDED, not dropped
-        assert len(tenure["gazetteList"]) == 1
-        assert tenure["gazetteList"][0]["date"] == "2022-01-01"
-        assert "last_day_gazette" in tenure["gazetteList"][0]["idList"]
+        assert len(tenure.gazetteList) == 1
+        assert tenure.gazetteList[0].date == "2022-01-01"
+        assert "last_day_gazette" in tenure.gazetteList[0].idList
 
 
 @pytest.mark.asyncio

@@ -1438,7 +1438,7 @@ class OrganisationService:
                 )
 
             if not president_relations:
-                return {"body": []}
+                return PresidentsResponse(body=[])
 
             # Group relations by id for multiple terms for the same president
             presidents_map = {}
@@ -1552,7 +1552,7 @@ class OrganisationService:
                 presidents_map.values(), key=get_latest_start, reverse=True
             )
 
-            return PresidentsResponse(body=presidents_list).model_dump()
+            return PresidentsResponse(body=presidents_list)
         except Exception as e:
             logger.error(f"Error fetching all presidents: {e}")
             raise InternalServerError("An unexpected error occurred") from e
