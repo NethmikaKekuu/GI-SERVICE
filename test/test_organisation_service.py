@@ -14,6 +14,7 @@ from src.models import (
     PortfolioPersonsResponse,
     BodiesByDepartmentResponse,
     PresidentsResponse,
+    BodyListItem,
 )
 
 
@@ -1489,12 +1490,11 @@ async def test_enrich_body_item_is_new(
             body_relation=body_relation, selected_date=selected_date
         )
 
-    assert result == {
-        "id": "body_123",
-        "name": "decoded_name",
-        "isNew": expected_is_new,
-        "type": "Council",
-    }
+    assert isinstance(result, BodyListItem)
+    assert result.id == "body_123"
+    assert result.name == "decoded_name"
+    assert result.isNew == expected_is_new
+    assert result.type == "Council"
 
     mock_opengin_service.get_entities.assert_called_once_with(
         entity=Entity(id="body_123")
@@ -1524,7 +1524,7 @@ async def test_enrich_body_item_empty_minor_kind(
             body_relation=body_relation, selected_date=selected_date
         )
 
-    assert result["type"] == ""
+    assert result.type == ""
 
 
 @pytest.mark.asyncio
@@ -1746,11 +1746,9 @@ async def test_bodies_by_department_no_relations_found(
         department_id="department_123", selected_date="2023-10-27"
     )
 
-    assert result == {
-        "totalBodies": 0,
-        "newBodies": 0,
-        "bodyList": [],
-    }
+    assert result.totalBodies == 0
+    assert result.newBodies == 0
+    assert result.bodyList == []
 
 
 @pytest.mark.asyncio
@@ -1783,18 +1781,18 @@ async def test_bodies_by_department_success(organisation_service, mock_opengin_s
         new_callable=AsyncMock,
     ) as mock_enrich_body:
         mock_enrich_body.side_effect = [
-            {
-                "id": "body_1",
-                "name": "Body 1 Name",
-                "isNew": True,
-                "type": "Council",
-            },
-            {
-                "id": "body_2",
-                "name": "Body 2 Name",
-                "isNew": False,
-                "type": "",
-            },
+            BodyListItem(
+                id="body_1",
+                name="Body 1 Name",
+                isNew=True,
+                type="Council",
+            ),
+            BodyListItem(
+                id="body_2",
+                name="Body 2 Name",
+                isNew=False,
+                type="",
+            ),
         ]
 
         result = await organisation_service.bodies_by_department(
@@ -1804,7 +1802,6 @@ async def test_bodies_by_department_success(organisation_service, mock_opengin_s
     assert isinstance(result, BodiesByDepartmentResponse)
     assert result.totalBodies == 2
     assert result.newBodies == 1
-    assert len(result.bodyList) == 2
     assert result.bodyList[0].id == "body_1"
     assert result.bodyList[0].name == "Body 1 Name"
     assert result.bodyList[0].isNew is True
@@ -1860,12 +1857,12 @@ async def test_bodies_by_department_partial_enrichment_failure(
         new_callable=AsyncMock,
     ) as mock_enrich_body:
         mock_enrich_body.side_effect = [
-            {
-                "id": "body_1",
-                "name": "Body 1 Name",
-                "isNew": True,
-                "type": "Council",
-            },
+            BodyListItem(
+                id="body_1",
+                name="Body 1 Name",
+                isNew=True,
+                type="Council",
+            ),
             InternalServerError("enrichment failed for body_2"),
         ]
 
@@ -1876,7 +1873,6 @@ async def test_bodies_by_department_partial_enrichment_failure(
     assert isinstance(result, BodiesByDepartmentResponse)
     assert result.totalBodies == 1
     assert result.newBodies == 1
-    assert len(result.bodyList) == 1
     assert result.bodyList[0].id == "body_1"
     assert result.bodyList[0].name == "Body 1 Name"
     assert result.bodyList[0].isNew is True
@@ -1948,12 +1944,12 @@ async def test_bodies_by_department_passes_normalized_date_to_enrich(
         "src.services.organisation_service.OrganisationService.enrich_body_item",
         new_callable=AsyncMock,
     ) as mock_enrich_body:
-        mock_enrich_body.return_value = {
-            "id": "body_1",
-            "name": "Body 1 Name",
-            "isNew": True,
-            "type": "Council",
-        }
+        mock_enrich_body.return_value = BodyListItem(
+            id="body_1",
+            name="Body 1 Name",
+            isNew=True,
+            type="Council",
+        )
 
         await organisation_service.bodies_by_department(
             department_id=department_id, selected_date=selected_date

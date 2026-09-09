@@ -1250,7 +1250,7 @@ class OrganisationService:
             name=name,
             isNew=is_new,
             type=minor_kind,
-        ).model_dump()
+        )
 
     # API: Bodies by departments
     async def bodies_by_department(self, department_id: str, selected_date: str):
@@ -1331,11 +1331,11 @@ class OrganisationService:
             logger.error(
                 f"bodies_by_department: no relations found for department_id={department_id!r}"
             )
-            return {
-                "totalBodies": 0,
-                "newBodies": 0,
-                "bodyList": [],
-            }
+            return BodiesByDepartmentResponse(
+                totalBodies=0,
+                newBodies=0,
+                bodyList=[],
+            )
 
         enrich_body_tasks = [
             self.enrich_body_item(
@@ -1374,7 +1374,7 @@ class OrganisationService:
                 f"for department_id={department_id!r}: {failures}"
             )
 
-        new_bodies = sum(1 for d in bodies if d.get("isNew"))
+        new_bodies = sum(1 for d in bodies if d.isNew)
 
         return BodiesByDepartmentResponse(
             totalBodies=len(bodies),
