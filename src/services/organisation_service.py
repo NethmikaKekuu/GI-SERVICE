@@ -339,7 +339,7 @@ class OrganisationService:
                     ministriesUnderPresident += minister.isPresident
 
             # final result to return
-            response = ActivePortfolioListResponse(
+            return ActivePortfolioListResponse(
                 NoOfCabinetMinistries=len(activePortfolioList) - noOfStateMinistries,
                 NoOfStateMinistries=noOfStateMinistries,
                 newMinistries=newMinistries,
@@ -347,8 +347,6 @@ class OrganisationService:
                 ministriesUnderPresident=ministriesUnderPresident,
                 portfolioList=validated_portfolios,
             )
-
-            return response
 
         except (BadRequestError, NotFoundError):
             raise
@@ -455,13 +453,11 @@ class OrganisationService:
             # Calculate final counts
             new_departments = sum(1 for d in departments if d.get("isNew"))
 
-            final_result = DepartmentsByPortfolioResponse(
+            return DepartmentsByPortfolioResponse(
                 totalDepartments=len(departments),
                 newDepartments=new_departments,
                 departmentList=departments,
             )
-
-            return final_result
 
         except (BadRequestError, NotFoundError):
             raise
@@ -521,9 +517,7 @@ class OrganisationService:
 
             prime_minister_data["term"] = term
 
-            final_result = PrimeMinisterResponse(body=prime_minister_data)
-
-            return final_result
+            return PrimeMinisterResponse(body=prime_minister_data)
 
         except (BadRequestError, NotFoundError):
             raise
@@ -1189,12 +1183,11 @@ class OrganisationService:
 
             new_count = sum(1 for p in validated_persons if p.isNew)
 
-            response = PortfolioPersonsResponse(
+            return PortfolioPersonsResponse(
                 totalCount=len(validated_persons),
                 newCount=new_count,
                 personList=validated_persons,
             )
-            return response
 
         except (BadRequestError, NotFoundError):
             raise
@@ -1318,7 +1311,6 @@ class OrganisationService:
             name=RelationNameEnum.AS_BODY.value,
             activeAt=normalized_date,
             direction=RelationDirectionEnum.OUTGOING.value,
-            response_model=BodiesByDepartmentResponse,
         )
 
         try:
@@ -1384,13 +1376,11 @@ class OrganisationService:
 
         new_bodies = sum(1 for d in bodies if d.get("isNew"))
 
-        response = BodiesByDepartmentResponse(
+        return BodiesByDepartmentResponse(
             totalBodies=len(bodies),
             newBodies=new_bodies,
             bodyList=bodies,
         )
-
-        return response
 
     # API: fetch presidents with terms and gazettes sorted by date
     async def fetch_presidents(self):
