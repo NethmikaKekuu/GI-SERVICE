@@ -351,7 +351,7 @@ async def test_fetch_data_catalog_with_entity_id_no_relations(
 
     assert isinstance(result, DataCatalogResponse)
     assert result.categories == []
-    assert result.datasets == []
+    assert not result.datasets
     assert mock_opengin_service.fetch_relation.call_count == 2
 
 
@@ -392,7 +392,7 @@ async def test_fetch_data_catalog_with_only_categories(
     assert isinstance(result, DataCatalogResponse)
     assert "cat_1" in result.categories[0].categoryIds
     assert len(result.categories) == 1
-    assert result.datasets == []
+    assert not result.datasets
     assert result.categories[0].name == "Solo Category"
 
 
@@ -863,8 +863,8 @@ async def test_fetch_data_attributes_with_empty_attributes(
         result = await data_service.fetch_data_attributes(dataset_id=dataset_id)
 
     assert result.type == KindMinorEnum.TABULAR.value
-    assert result.data.columns == []
-    assert result.data.rows == []
+    assert not result.data.columns
+    assert not result.data.rows
 
 
 @pytest.mark.asyncio
