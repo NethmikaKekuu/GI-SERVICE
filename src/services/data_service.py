@@ -13,7 +13,7 @@ from src.models import (
     Kind,
     Relation,
     DataCatalogResponse,
-    DatasetAvailableYearsResponse,
+    DatasetYearsResponse,
     DataAttributesNotFoundResponse,
     DataAttributesResponse,
     DatasetRootItem,
@@ -321,7 +321,7 @@ class DataService:
             # sort the list by years
             dataset_years.sort(key=lambda x: x["year"])
 
-            return DatasetAvailableYearsResponse(
+            return DatasetYearsResponse(
                 name=actual_name_title_case, years=dataset_years
             )
 

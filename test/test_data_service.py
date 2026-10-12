@@ -13,7 +13,7 @@ from src.models import (
     Kind,
     Relation,
     DataCatalogResponse,
-    DatasetAvailableYearsResponse,
+    DatasetYearsResponse,
     DataAttributesResponse,
     DatasetRootItem,
 )
@@ -511,7 +511,7 @@ async def test_fetch_dataset_available_years_success(
     ):
         result = await data_service.fetch_dataset_available_years(dataset_ids)
 
-    assert isinstance(result, DatasetAvailableYearsResponse)
+    assert isinstance(result, DatasetYearsResponse)
     # Assertions
     assert result.name == "Population Dataset"
     assert len(result.years) == 3
@@ -550,7 +550,7 @@ async def test_fetch_dataset_available_years_single_year(
             dataset_ids=dataset_ids
         )
 
-    assert isinstance(result, DatasetAvailableYearsResponse)
+    assert isinstance(result, DatasetYearsResponse)
     assert result.name == "Single Year Dataset"
     assert len(result.years) == 1
     assert result.years[0].year == "2023"
@@ -598,7 +598,7 @@ async def test_fetch_dataset_available_years_with_missing_created_date(
             dataset_ids=dataset_ids
         )
 
-    assert isinstance(result, DatasetAvailableYearsResponse)
+    assert isinstance(result, DatasetYearsResponse)
     # When created date is None, the year should be "Unknown"
     assert result.name == "Dataset Without Date"
     assert len(result.years) == 1
@@ -663,7 +663,7 @@ async def test_fetch_dataset_available_years_multiple_years_sorted(
             dataset_ids=dataset_ids
         )
 
-    assert isinstance(result, DatasetAvailableYearsResponse)
+    assert isinstance(result, DatasetYearsResponse)
 
     # After get_name_without_year removes the -YYYY pattern,
     # we get "Multi-Year Dataset", then title case

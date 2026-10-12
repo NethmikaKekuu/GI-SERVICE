@@ -66,7 +66,7 @@ class DatasetYearEntry(BaseModel):
     )
 
 
-class DatasetAvailableYearsResponse(BaseModel):
+class DatasetYearsResponse(BaseModel):
     """Flat response — no envelope."""
 
     model_config = ConfigDict(extra="forbid")

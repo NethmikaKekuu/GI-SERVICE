@@ -4,7 +4,7 @@ from src.models import (
     DataCatalogRequest,
     DatasetYearsRequest,
     DataCatalogResponse,
-    DatasetAvailableYearsResponse,
+    DatasetYearsResponse,
     DataAttributesResponse,
     DataAttributesNotFoundResponse,
     DatasetRootItem,
@@ -37,7 +37,7 @@ async def get_data_catalog(
     "/datasets/years",
     summary="Get all the dataset available years for the given datasets.",
     description="Returns the list of years and datasetIds for available datasets with dataset name.",
-    response_model=DatasetAvailableYearsResponse,
+    response_model=DatasetYearsResponse,
 )
 async def get_dataset_available_years(
     request: DatasetYearsRequest, service: DataService = Depends(get_data_service)
