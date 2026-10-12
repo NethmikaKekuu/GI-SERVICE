@@ -9,6 +9,7 @@ from src.models import (
     DataAttributesNotFoundResponse,
     DatasetRootItem,
     DatasetNotFoundResponse,
+    DatasetCategoriesResponse,
 )
 from src.services import DataService, OpenGINService
 
@@ -78,6 +79,7 @@ async def get_dataset_root(
     "/datasets/{datasetId}/categories",
     summary="Get categories for the given dataset.",
     description="Returns the full category hierarchy for the given dataset, from immediate parent to root.",
+    response_model=DatasetCategoriesResponse,
 )
 async def get_dataset_categories(
     datasetId: str = Path(..., description="The ID of the dataset"),
