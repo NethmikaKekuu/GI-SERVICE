@@ -10,7 +10,7 @@ from .data_requestbody import (
     DataAttributesNotFoundResponse,
     EntityKind,
     DatasetInfo,
-    CategoryHierarchyItem,
+    CategoryInfo,
     DatasetCategoriesResponse,
 )
 from .opengin_schemas import (
@@ -83,6 +83,6 @@ __all__ = [
     "DataAttributesNotFoundResponse",
     "EntityKind",
     "DatasetInfo",
-    "CategoryHierarchyItem",
+    "CategoryInfo",
     "DatasetCategoriesResponse",
 ]

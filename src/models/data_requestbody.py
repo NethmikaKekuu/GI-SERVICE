@@ -159,7 +159,7 @@ class DatasetInfo(BaseModel):
     kind: EntityKind
 
 
-class CategoryHierarchyItem(BaseModel):
+class CategoryInfo(BaseModel):
     """One category in the hierarchy, from immediate parent up to (and including) the root."""
 
     model_config = ConfigDict(extra="forbid")
@@ -175,4 +175,4 @@ class DatasetCategoriesResponse(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     dataset: DatasetInfo
-    categories: List[CategoryHierarchyItem] = Field(default_factory=list)
+    categories: List[CategoryInfo] = Field(default_factory=list)
