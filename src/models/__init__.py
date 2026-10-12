@@ -1,4 +1,4 @@
-from .data_requestbody import (
+from .data_schemas import (
     DataCatalogRequest,
     DatasetYearsRequest,
     DataCatalogResponse,
