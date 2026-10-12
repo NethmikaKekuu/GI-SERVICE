@@ -119,7 +119,6 @@ class TabularData(BaseModel):
     )
 
 
-
 class DataAttributesResponse(BaseModel):
     """Response for a dataset's formatted attributes."""
 
