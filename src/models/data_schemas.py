@@ -132,7 +132,6 @@ class DataAttributesResponse(BaseModel):
     data: TabularData = Field(..., description="Tabular data payload")
 
 
-
 class EntityKind(BaseModel):
     """Major/minor kind classification, reused across dataset and category entries."""
 

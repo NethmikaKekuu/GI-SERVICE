@@ -791,11 +791,10 @@ async def test_fetch_data_attributes_dataset_not_found(
         )
     ]
 
-    result = await data_service.fetch_data_attributes(dataset_id=dataset_id)
+    with pytest.raises(NotFoundError) as exc_info:
+        await data_service.fetch_data_attributes(dataset_id=dataset_id)
 
-    # Should return a message indicating dataset not found
-    assert "message" in result
-    assert result["message"] == "Dataset or its relations not found"
+    assert "Dataset or its relations not found" in str(exc_info.value)
 
 
 @pytest.mark.asyncio
@@ -816,11 +815,10 @@ async def test_fetch_data_attributes_no_relations_found(
     mock_opengin_service.get_entities.return_value = [mock_entity]
     mock_opengin_service.fetch_relation.return_value = []
 
-    result = await data_service.fetch_data_attributes(dataset_id=dataset_id)
+    with pytest.raises(NotFoundError) as exc_info:
+        await data_service.fetch_data_attributes(dataset_id=dataset_id)
 
-    # Should return a message indicating relations not found
-    assert "message" in result
-    assert result["message"] == "Dataset or its relations not found"
+    assert "Dataset or its relations not found" in str(exc_info.value)
 
 
 @pytest.mark.asyncio
