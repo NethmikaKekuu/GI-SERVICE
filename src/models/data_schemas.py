@@ -132,13 +132,6 @@ class DataAttributesResponse(BaseModel):
     data: TabularData = Field(..., description="Tabular data payload")
 
 
-class DataAttributesNotFoundResponse(BaseModel):
-    """Returned instead of DataAttributesResponse when the dataset or its relations aren't found."""
-
-    model_config = ConfigDict(extra="forbid")
-
-    message: str = Field(..., examples=["Dataset or its relations not found"])
-
 
 class EntityKind(BaseModel):
     """Major/minor kind classification, reused across dataset and category entries."""

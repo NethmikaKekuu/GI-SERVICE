@@ -6,7 +6,6 @@ from src.models import (
     DataCatalogResponse,
     DatasetYearsResponse,
     DataAttributesResponse,
-    DataAttributesNotFoundResponse,
     DatasetRootItem,
     DatasetNotFoundResponse,
     DatasetCategoriesResponse,
@@ -51,7 +50,7 @@ async def get_dataset_available_years(
     "/datasets/{datasetId}/data",
     summary="Get the data attributes for the given dataset.",
     description="Returns the data attributes for the given dataset",
-    response_model=DataAttributesResponse | DataAttributesNotFoundResponse,
+    response_model=DataAttributesResponse,
 )
 async def get_data_attributes(
     datasetId: str = Path(..., description="The ID of the dataset"),
